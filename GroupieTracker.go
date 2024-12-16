@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -14,15 +15,15 @@ type artists struct {
 	members       []string
 	creationDates int
 	firstAlbum    string
-	location      locations
-	concertDates  dates
-	relations     relation
+	location      locations `json: "location"`
+	concertDates  dates     `json: "concertDates"`
+	relations     relation  `json: "relations"`
 }
 
 type locations struct {
 	id        int
 	locations []string
-	dates     dates
+	dates     dates `json: "dates"`
 }
 
 type dates struct {
@@ -32,19 +33,45 @@ type dates struct {
 
 type relation struct {
 	id             int
-	datesLocations []string
+	datesLocations []string `json: "datesLocations"`
 }
 
-func main() {
-	res, err := http.Get("https://groupietrackers.herokuapp.com/api/relation")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer res.Body.Close()
-
+func GetLocations() {
+	res := GetAPI("https://groupietrackers.herokuapp.com/api/locations")
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Print(string(body))
+
+	var location locations
+	json.Unmarshal(body, &location)
+
+}
+
+func GetDates() {
+	res := GetAPI("https://groupietrackers.herokuapp.com/api/dates")
+	fmt.Println(res)
+}
+
+func GetArtist() {
+	res := GetAPI("https://groupietrackers.herokuapp.com/api/artists")
+	fmt.Println(res)
+}
+
+func GetRelation() {
+	res := GetAPI("https://groupietrackers.herokuapp.com/api/dates")
+	fmt.Println(res)
+}
+
+func GetAPI(url string) *http.Response {
+	res, err := http.Get(url)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer res.Body.Close()
+	return res
+}
+
+func main() {
+
 }
