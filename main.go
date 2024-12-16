@@ -9,7 +9,7 @@ import (
 
 func main() {
 	// URL de l'API
-	url := "https://groupietrackers.herokuapp.com/api"
+	url := "https://groupietrackers.herokuapp.com/api/artists"
 
 	// Faire une requête GET
 	resp, err := http.Get(url)
