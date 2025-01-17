@@ -23,7 +23,7 @@ type Artist struct {
 type LocationData struct {
 	Id        int      `json:"id"`
 	Locations []string `json:"locations"`
-	Dates     Dates    `json:"dates"`
+	Dates     string   `json:"dates"`
 }
 
 type Dates struct {
@@ -60,73 +60,39 @@ func GetArtist() {
 	}
 
 	for _, artist := range artists {
-		// Convert the artist struct to a JSON string with indentation
+		if artist.Location[:len(artist.Location)-3] == "https://groupietrackers.herokuapp.com/api/locations" {
+			getLocation(artist.Location)
+		}
+		if artist.ConcertDates[:len(artist.ConcertDates)-3] == "https://groupietrackers.herokuapp.com/api/dates" {
+			getDates(artist.ConcertDates)
+		}
+		if artist.Relations[:len(artist.Relations)-3] == "https://groupietrackers.herokuapp.com/api/relation" {
+			getRelation(artist.Relations)
+		}
 		artistJSON, err := json.MarshalIndent(artist, "", "  ")
 		if err != nil {
 			log.Fatalf("Error marshaling data: %v", err)
 		}
 		fmt.Println(string(artistJSON))
 		fmt.Println("------------------------------")
+
 	}
 }
 
-func GetLocations() {
-	body := GetInfo("https://groupietrackers.herokuapp.com/api/locations")
-
-	// Unmarshal into a single Locations struct to inspect the structure
-	var locations LocationData
-	err := json.Unmarshal(body, &locations)
-	if err != nil {
-		log.Fatalf("Error unmarshaling data: %v", err)
-	}
-
-	locationJSON, err := json.MarshalIndent(locations, "", "  ")
-	if err != nil {
-		log.Fatalf("Error marshaling data: %v", err)
-	}
-	fmt.Println(string(locationJSON))
-	fmt.Println("------------------------------")
-}
-
-func GetDates() {
-	body := GetInfo("https://groupietrackers.herokuapp.com/api/dates")
-
-	fmt.Println("Raw JSON Response:")
+func getLocation(url string) {
+	body := GetInfo(url)
 	fmt.Println(string(body))
 
-	var dates Dates
-	err := json.Unmarshal(body, &dates)
-	if err != nil {
-		log.Fatalf("Error unmarshaling data: %v", err)
-	}
-
-	dateJSON, err := json.MarshalIndent(dates, "", "  ")
-	if err != nil {
-		log.Fatalf("Error marshaling data: %v", err)
-	}
-	fmt.Println(string(dateJSON))
-	fmt.Println("------------------------------")
 }
 
-func GetRelation() {
-	body := GetInfo("https://groupietrackers.herokuapp.com/api/relation")
-
-	fmt.Println("Raw JSON Response:")
+func getDates(url string) {
+	body := GetInfo(url)
 	fmt.Println(string(body))
+}
 
-	var relation Relation
-	err := json.Unmarshal(body, &relation)
-	if err != nil {
-		log.Fatalf("Error unmarshaling data: %v", err)
-	}
-
-	// Convert the relation struct to a JSON string with indentation
-	relationJSON, err := json.MarshalIndent(relation, "", "  ")
-	if err != nil {
-		log.Fatalf("Error marshaling data: %v", err)
-	}
-	fmt.Println(string(relationJSON))
-	fmt.Println("------------------------------")
+func getRelation(url string) {
+	body := GetInfo(url)
+	fmt.Println(string(body))
 }
 
 func main() {
