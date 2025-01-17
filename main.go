@@ -12,17 +12,21 @@ import (
 
 const tmpl = `
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Groupie Tracker</title>
+    <title>Artist Info</title>
 </head>
 <body>
-    <h1>Groupie Tracker</h1>
-    <div id="content">
-        <pre>{{.}}</pre>
-    </div>
+	{{range .}}
+    <h1>{{.Name}}</h1>
+    <img src="{{.Image}}" alt="{{.Name}}">
+    <p>Members: {{range .Members}}{{.}}, {{end}}</p>
+    <p>Creation Date: {{.CreationDate}}</p>
+    <p>First Album: {{.FirstAlbum}}</p>
+    <p>Location: {{.Location}}</p>
+    <p>Concert Dates: {{.ConcertDates}}</p>
+    <p>Relations: {{.Relations}}</p>
+	{{end}}
 </body>
 </html>
 `

@@ -67,32 +67,11 @@ func GetArtist() ([]Artist, error) {
 	var artists []Artist
 	err = json.Unmarshal(body, &artists)
 	if err != nil {
-		return nil, fmt.Errorf("Erreur lors du déchiffrement des données: %v", err)
+		return nil, fmt.Errorf("Erreur lors du déchiffrement du JSON: %v", err)
 	}
 
 	return artists, nil
 }
-
-// func GetArtist() {
-// 	body := GetInfo("https://groupietrackers.herokuapp.com/api/artists")
-
-// 	var artists []Artist
-// 	err := json.Unmarshal(body, &artists)
-// 	if err != nil {
-// 		log.Fatalf("Error unmarshaling data: %v", err)
-// 	}
-
-// 	for _, artist := range artists {
-// 		// Convert the artist struct to a JSON string with indentation
-// 		artistJSON, err := json.MarshalIndent(artist, "", "  ")
-// 		if err != nil {
-// 			log.Fatalf("Error marshaling data: %v", err)
-// 		}
-// 		fmt.Println(string(artistJSON))
-// 		// fmt.Println("------------------------------")
-// 	}
-// 	return artists, nil
-// }
 
 func GetLocations() {
 	body := GetInfo("https://groupietrackers.herokuapp.com/api/locations")
