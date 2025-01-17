@@ -15,6 +15,7 @@ const tmpl = `
 <html>
 <head>
     <title>Artist Info</title>
+	<link rel="stylesheet" type="text/css" href="/Styles/style.css">
 </head>
 <body>
 	{{range .}}
@@ -71,6 +72,7 @@ func openBrowser(url string) {
 }
 
 func main() {
+	http.Handle("/Styles/", http.StripPrefix("/Styles/", http.FileServer(http.Dir("Styles"))))
 	http.HandleFunc("/", handler)
 	fmt.Println("Starting server at port 8080")
 	go openBrowser("http://localhost:8080")
