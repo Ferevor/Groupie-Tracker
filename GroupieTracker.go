@@ -50,7 +50,33 @@ func GetInfo(url string) []byte {
 	return body
 }
 
-func GetArtist() {
+func getRelation(url string) {
+	body := GetInfo(url)
+
+	var relation Relation
+	err := json.Unmarshal(body, &relation)
+	if err != nil {
+		log.Fatalf("Error unmarshaling data: %v", err)
+	}
+
+	fmt.Println(relation.DatesLocations)
+
+}
+
+// exemple pour avoir les info sur les API de dates et location
+func getDates(url string) {
+	body := GetInfo(url)
+
+	var date Dates
+	err := json.Unmarshal(body, &date)
+	if err != nil {
+		log.Fatalf("Error unmarshaling data: %v", err)
+	}
+
+	fmt.Println("Name:", date.Dates)
+}
+
+func main() {
 	body := GetInfo("https://groupietrackers.herokuapp.com/api/artists")
 
 	var artists []Artist
@@ -59,45 +85,16 @@ func GetArtist() {
 		log.Fatalf("Error unmarshaling data: %v", err)
 	}
 
+	var nbr int
 	for _, artist := range artists {
-		if artist.Location[:len(artist.Location)-3] == "https://groupietrackers.herokuapp.com/api/locations" {
-			getLocation(artist.Location)
-		}
-		if artist.ConcertDates[:len(artist.ConcertDates)-3] == "https://groupietrackers.herokuapp.com/api/dates" {
-			getDates(artist.ConcertDates)
-		}
-		if artist.Relations[:len(artist.Relations)-3] == "https://groupietrackers.herokuapp.com/api/relation" {
-			getRelation(artist.Relations)
-		}
-		artistJSON, err := json.MarshalIndent(artist, "", "  ")
-		if err != nil {
-			log.Fatalf("Error marshaling data: %v", err)
-		}
-		fmt.Println(string(artistJSON))
-		fmt.Println("------------------------------")
-
+		nbr += 1
+		fmt.Println("----------------------------")
+		fmt.Println("ID:", artist.Id)
+		fmt.Println("Name:", artist.Name)
+		fmt.Println("Image:", artist.Image)
+		fmt.Println("Members:", artist.Members)
+		fmt.Println("Creation date:", artist.CreationDate)
+		fmt.Println("First album:", artist.FirstAlbum)
+		getRelation(artist.Relations)
 	}
-}
-
-func getLocation(url string) {
-	body := GetInfo(url)
-	fmt.Println(string(body))
-
-}
-
-func getDates(url string) {
-	body := GetInfo(url)
-	fmt.Println(string(body))
-}
-
-func getRelation(url string) {
-	body := GetInfo(url)
-	fmt.Println(string(body))
-}
-
-func main() {
-	GetArtist()
-	//GetLocations()
-	//GetDates()
-	//GetRelation()
 }
