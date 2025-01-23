@@ -20,17 +20,6 @@ type Artist struct {
 	Relations    string   `json:"relations"`
 }
 
-type LocationData struct {
-	Id        int      `json:"id"`
-	Locations []string `json:"locations"`
-	Dates     string   `json:"dates"`
-}
-
-type Dates struct {
-	Id    int      `json:"id"`
-	Dates []string `json:"dates"`
-}
-
 type Relation struct {
 	Id             int                 `json:"id"`
 	DatesLocations map[string][]string `json:"datesLocations"`
@@ -59,21 +48,15 @@ func getRelation(url string) {
 		log.Fatalf("Error unmarshaling data: %v", err)
 	}
 
-	fmt.Println(relation.DatesLocations)
-
-}
-
-// exemple pour avoir les info sur les API de dates et location
-func getDates(url string) {
-	body := GetInfo(url)
-
-	var date Dates
-	err := json.Unmarshal(body, &date)
-	if err != nil {
-		log.Fatalf("Error unmarshaling data: %v", err)
+	fmt.Println("DatesLocations:")
+	for key, value := range relation.DatesLocations {
+		fmt.Println("     " + string(key))
+		for i := 0; i < len(value); i++ {
+			fmt.Println("          " + string(value[i]))
+		}
+		fmt.Println()
 	}
 
-	fmt.Println("Name:", date.Dates)
 }
 
 func main() {
@@ -85,16 +68,24 @@ func main() {
 		log.Fatalf("Error unmarshaling data: %v", err)
 	}
 
-	var nbr int
 	for _, artist := range artists {
-		nbr += 1
 		fmt.Println("----------------------------")
-		fmt.Println("ID:", artist.Id)
-		fmt.Println("Name:", artist.Name)
-		fmt.Println("Image:", artist.Image)
-		fmt.Println("Members:", artist.Members)
-		fmt.Println("Creation date:", artist.CreationDate)
-		fmt.Println("First album:", artist.FirstAlbum)
+		fmt.Println("ID:")
+		fmt.Println("     ", artist.Id, "\n")
+		fmt.Println("Name:")
+		fmt.Println("     ", artist.Name, "\n")
+		fmt.Println("Image:")
+		fmt.Println("     ", artist.Image, "\n")
+		fmt.Println("Members:")
+		for i := 0; i < len(artist.Members); i++ {
+			fmt.Println("     ", artist.Members[i])
+		}
+		fmt.Println()
+		fmt.Println("Creation date:")
+		fmt.Println("     ", artist.CreationDate, "\n")
+		fmt.Println("First album:")
+		fmt.Println("     ", artist.FirstAlbum, "\n")
 		getRelation(artist.Relations)
+		fmt.Println()
 	}
 }
