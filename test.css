@@ -1,0 +1,174 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+html {
+    font-family: 'lato';
+}
+
+.navCheckBox {
+    display: none;
+}
+
+.navBg {
+    height: 100%;
+    width: 25%; 
+    border-radius: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    transition: transform 0.8s cubic-bezier(0.86, 0, 0.07, 1);
+    background-color: transparent;
+}
+
+.navBtn {
+    background-color: #fff;
+    height: 7rem;
+    width: 7rem;
+    position: fixed;
+    top: 4rem;
+    right: 6rem;
+    border-radius: 50%;
+    z-index: 2000;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.1);
+    text-align: center;
+    cursor: pointer;
+}
+
+.navIcon {
+    position: relative;
+    margin-top: 3.5rem;
+    width: 3rem;
+    height: 2px;
+    background-color: #333;
+    display: inline-block;
+}
+
+.navIcon::before,
+.navIcon::after {
+    width: 3rem;
+    height: 2px;
+    background-color: #333;
+    display: inline-block;
+    content: "";
+    position: absolute;
+    left: 0;
+    transition: all .2s;
+}
+
+.navIcon::before {
+    top: -.8rem;
+}
+
+.navIcon::after {
+    top: .8rem;
+}
+
+.nav {
+    height: 100%;
+    width: 25%; 
+    position: fixed;
+    left: 0;
+    opacity: 0;
+    z-index: 1500;
+    transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.navList {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    list-style-type: none;
+    text-align: center;
+    width: 100%;
+}
+
+.liens {
+    display: block;
+    font-size: 30px;
+    font-weight: 300;
+    color: #fff;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    margin-bottom: 15%; 
+}
+
+.navCheckBox:checked ~ .navBg {
+    transform: scale(80);
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.navCheckBox:checked ~ .nav {
+    opacity: 1;
+    width: 25%;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.navCheckBox:checked + .navBtn .navIcon {
+    background-color: transparent;
+}
+
+.navCheckBox:checked + .navBtn .navIcon::before {
+    top: 0;
+    transform: rotate(135deg);
+}
+
+.navCheckBox:checked + .navBtn .navIcon::after {
+    top: 0;
+    transform: rotate(-135deg);
+}
+
+.menu {
+    width: 50%; 
+    margin: 0 auto; 
+}
+
+.dropbtn {
+    background-color: #fff;
+    color: black;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    left: 100%; 
+    top: 0; 
+    background-color: #fff;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown:hover .dropbtn {
+    background-color: #fff;
+}
