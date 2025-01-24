@@ -18,16 +18,23 @@ const tmpl = `
 	<link rel="stylesheet" type="text/css" href="/Styles/style.css">
 </head>
 <body>
-		{{range .}}
-		<article>
-		<div class="image">
-		<img src="{{.Image}}" alt="{{.Name}}">
+	<div>
+		<div class="header">
+			<h1>Groupie Tracker</h1>
 		</div>
-		<div>
-    	<h1>{{.Name}}</h1>
+		<div class="container">
+			{{range .}}
+			<div class="card">
+				<div class="image">
+					<img src="{{.Image}}" alt="Image" width="200" height="200">
+				</div>
+				<div class="content">
+					<h2>{{.Name}}</h2>
+				</div>
+			</div>
+			{{end}}
 		</div>
-		</article>
-		{{end}}
+	</div>
 </body>
 </html>
 `
