@@ -15,32 +15,25 @@ const tmpl = `
 <html>
 <head>
     <title>Artist Info</title>
-	<link rel="stylesheet" type="text/css" href="/Styles/style.css">
+    <link rel="stylesheet" type="text/css" href="/Styles/style.css">
 </head>
 <body>
-	<div>
-		<div class="header">
-			<h1>Groupie Tracker</h1>
-		</div>
-		<div class="box">
-  		 	 <form name="search">
-        		<input type="text" class="input" name="txt" onmouseout="this.value = ''; this.blur();">
-    		</form>
-    		<i class="image.png"></i>
-		</div>
-		<div class="container">
-			{{range .}}
-			<div class="card">
-				<div class="image">
-					<img src="{{.Image}}" alt="Image" width="200" height="200">
-				</div>
-				<div class="content">
-					<h2>{{.Name}}</h2>
-				</div>
-			</div>
-			{{end}}
-		</div>
-	</div>
+    {{range .}}
+    	<h1>{{.Name}}</h1>
+    	<img src="{{.Image}}" alt="{{.Name}}">
+    	<p>Members: {{range .Members}}{{.}}, {{end}}</p>
+    	<p>Creation Date: {{.CreationDate}}</p>
+    	<p>First Album: {{.FirstAlbum}}</p>
+    	<p>Relations:</p>
+    	{{range $key, $value := .DatesLocations.DatesLocations}}
+    	    <p>{{$key}}</p>
+    	    <ul>
+    	    	{{range $value}}
+            		<li>{{.}}</li>
+    	    	{{end}}
+        	</ul>
+    	{{end}}
+    {{end}}
 </body>
 </html>
 `
