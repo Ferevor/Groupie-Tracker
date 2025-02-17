@@ -22,6 +22,12 @@ const tmpl = `
 		<div class="header">
 			<h1>Groupie Tracker</h1>
 		</div>
+		<div class="box">
+  		 	 <form name="search">
+        		<input type="text" class="input" name="txt" onmouseout="this.value = ''; this.blur();">
+    		</form>
+    		<i class="image.png"></i>
+		</div>
 		<div class="container">
 			{{range .}}
 			<div class="card">
