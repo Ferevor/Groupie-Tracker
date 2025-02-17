@@ -3,7 +3,7 @@ package Mod
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 )
@@ -33,7 +33,7 @@ func GetInfo(url string) []byte {
 	}
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,4 +61,8 @@ func GetData() ([]Artist, error) {
 	}
 
 	return artists, nil
+}
+
+func ArtistInfo(name string) {
+
 }
