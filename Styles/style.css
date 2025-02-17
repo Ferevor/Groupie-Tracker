@@ -1,46 +1,71 @@
-/* Basic CSS for a web page */
-
 body {
-    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
     margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
 }
 
-header {
-    background-color: #333;
-    color: white;
-    padding: 10px 0;
+.header {
     text-align: center;
-}
-
-nav {
-    background-color: #444;
-    color: white;
+    background-color: #ffd52d;
     padding: 10px;
+    color: #19161c;
+}
+
+.container {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    background-color: #19161c;
+}
+
+.card {
+    border: 4px solid #ffd52d;
+    background-color: #433131;
+    color: white;
+    text-align: center;
+    width: 200px;
+    height: 300px;
+    margin-top: 35px;
+}
+
+.content {
     text-align: center;
 }
 
-nav a {
-    color: white;
-    margin: 0 10px;
-    text-decoration: none;
-}
-
-nav a:hover {
-    text-decoration: underline;
-}
-
-main {
-    padding: 20px;
-}
-
-footer {
-    background-color: #333;
-    color: white;
+.box {
+    padding-top: 10px;
+    background-color: #19161c;
+    position: relative;
     text-align: center;
-    padding: 10px 0;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
+}
+
+.input {
+    width: 26px;
+    background: none;
+    border: 4px solid #ffd52d;
+    border-radius: 50px;
+    box-sizing: border-box;
+    font-size: 12px;
+    color: #ffd52d;
+    outline: none;
+    transition: .5s;
+}
+
+.box:hover input{
+    width: 150px;
+    background: #3b3640;
+    border-radius: 10px;
+}
+.box i{
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translate(-50%,-50%);
+    font-size: 26px;
+    color: #ffd52d;
+    transition: .2s;
+}
+.box:hover i{
+    opacity: 0;
+    z-index: -1;
 }

@@ -18,35 +18,48 @@ const tmpl = `
 	<link rel="stylesheet" type="text/css" href="/Styles/style.css">
 </head>
 <body>
-	{{range .}}
-    <h1>{{.Name}}</h1>
-    <img src="{{.Image}}" alt="{{.Name}}">
-    <p>Members: {{range .Members}}{{.}}, {{end}}</p>
-    <p>Creation Date: {{.CreationDate}}</p>
-    <p>First Album: {{.FirstAlbum}}</p>
-    <p>Location: {{.Location}}</p>
-    <p>Concert Dates: {{.ConcertDates}}</p>
-    <p>Relations: {{.Relations}}</p>
-	{{end}}
+	<div>
+		<div class="header">
+			<h1>Groupie Tracker</h1>
+		</div>
+		<div class="box">
+  		 	 <form name="search">
+        		<input type="text" class="input" name="txt" onmouseout="this.value = ''; this.blur();">
+    		</form>
+    		<i class="image.png"></i>
+		</div>
+		<div class="container">
+			{{range .}}
+			<div class="card">
+				<div class="image">
+					<img src="{{.Image}}" alt="Image" width="200" height="200">
+				</div>
+				<div class="content">
+					<h2>{{.Name}}</h2>
+				</div>
+			</div>
+			{{end}}
+		</div>
+	</div>
 </body>
 </html>
 `
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	// Appeler la fonction GetArtist depuis GroupieTracker.go
-	data, err := Mod.GetArtist()
+	// Call GetData() from Mod package
+	data, err := Mod.GetData()
 	if err != nil {
 		log.Fatalf("Erreur: %v", err)
 	}
 
-	// Charger le template HTML
-	tmpl, err := template.New("webpage").Parse(tmpl)
+	// Load HTML template
+	t, err := template.New("webpage").Parse(tmpl)
 	if err != nil {
 		log.Fatalf("Erreur lors du chargement du template: %v", err)
 	}
 
-	// Rendre le template avec les données
-	err = tmpl.Execute(w, data)
+	// Render the template with data
+	err = t.Execute(w, data)
 	if err != nil {
 		log.Fatalf("Erreur lors du rendu du template: %v", err)
 	}

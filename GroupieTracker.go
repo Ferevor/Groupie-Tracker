@@ -128,10 +128,3 @@ func GetRelation() {
 	fmt.Println(string(relationJSON))
 	fmt.Println("------------------------------")
 }
-
-func main() {
-	GetArtist()
-	//GetLocations()
-	//GetDates()
-	//GetRelation()
-}
