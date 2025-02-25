@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type Artist struct {
@@ -15,8 +16,6 @@ type Artist struct {
 	Members        []string `json:"members"`
 	CreationDate   int      `json:"creationDate"`
 	FirstAlbum     string   `json:"firstAlbum"`
-	Location       string   `json:"location"`
-	ConcertDates   string   `json:"concertDates"`
 	Relations      string   `json:"relations"`
 	DatesLocations Relation
 }
@@ -59,10 +58,76 @@ func GetData() ([]Artist, error) {
 		}
 		artists[i].DatesLocations = relation
 	}
-
 	return artists, nil
 }
 
-func ArtistInfo(name string) {
+func GetOneArtistInfo(name string) Artist {
+	art, _ := GetData()
+	var artInfo Artist
+	for i := range art {
+		if art[i].Name == name {
+			artInfo.Image = art[i].Image
+			artInfo.Name = art[i].Name
+			artInfo.Members = art[i].Members
+			artInfo.CreationDate = art[i].CreationDate
+			artInfo.FirstAlbum = art[i].FirstAlbum
+			artInfo.DatesLocations = art[i].DatesLocations
+		}
+	}
+	return artInfo
+}
 
+func FiltersType(typeFilter string, art []Artist) {
+	if typeFilter == "by_creationDate" {
+		//art = Filter(art)
+	} else if typeFilter == "by_firstAlbum" {
+
+	} else if typeFilter == "by_nbrMembers" {
+
+	} else if typeFilter == "by_locationConcert" {
+
+	}
+}
+
+func RightFormForDate(date string) string {
+	date = strings.ReplaceAll(date, "/", "-")
+	return date
+}
+
+func memberMatch(query string, members []string) bool {
+	for _, member := range members {
+		if strings.Contains(strings.ToLower(member), strings.ToLower(query)) {
+			return true
+		}
+	}
+	return false
+}
+
+func locationMatch(query string, datesLocations map[string][]string) bool {
+	for location, _ := range datesLocations {
+		if strings.Contains(strings.ToLower(string(location)), strings.ToLower(query)) {
+			return true
+		}
+	}
+	return false
+}
+
+func SearchBar(query string, data []Artist) []Artist {
+	var filteredArtists []Artist
+	if query != "" {
+		for _, artist := range data {
+
+			if strings.Contains(strings.ToLower(artist.FirstAlbum), strings.ToLower(RightFormForDate(query))) ||
+				strings.Contains(fmt.Sprintf("%d", artist.CreationDate), query) ||
+				locationMatch(query, artist.DatesLocations.DatesLocations) ||
+				memberMatch(query, artist.Members) {
+				filteredArtists = append(filteredArtists, artist)
+			} else if strings.Contains(strings.ToLower(artist.Name), strings.ToLower(query)) {
+				filteredArtists = append([]Artist{artist}, filteredArtists...)
+			}
+		}
+	} else {
+		filteredArtists = data
+	}
+	return filteredArtists
 }

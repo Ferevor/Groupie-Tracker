@@ -10,6 +10,11 @@ import (
 	"runtime"
 )
 
+type PageData struct {
+	Query   string
+	Artists []Mod.Artist
+}
+
 const tmpl = `
 <!DOCTYPE html>
 <html>
@@ -18,43 +23,56 @@ const tmpl = `
     <link rel="stylesheet" type="text/css" href="/Styles/style.css">
 </head>
 <body>
-    {{range .}}
-    	<h1>{{.Name}}</h1>
-    	<img src="{{.Image}}" alt="{{.Name}}">
-    	<p>Members: {{range .Members}}{{.}}, {{end}}</p>
-    	<p>Creation Date: {{.CreationDate}}</p>
-    	<p>First Album: {{.FirstAlbum}}</p>
-    	<p>Relations:</p>
-    	{{range $key, $value := .DatesLocations.DatesLocations}}
-    	    <p>{{$key}}</p>
-    	    <ul>
-    	    	{{range $value}}
-            		<li>{{.}}</li>
-    	    	{{end}}
-        	</ul>
-    	{{end}}
-    {{end}}
+    <form method="GET" action="/">
+    <input type="text" name="query" value="{{.Query}}" onfocus="this.value=''" />
+</form>
+
+    <div id="results">
+        {{range .Artists}}
+            <h1>{{.Name}}</h1>
+            <img src="{{.Image}}" alt="{{.Name}}">
+            <p>Members: {{range .Members}}{{.}}, {{end}}</p>
+            <p>Creation Date: {{.CreationDate}}</p>
+            <p>First Album: {{.FirstAlbum}}</p>
+            <!-- ------------- Affichage dates et locations ----------------------- -->
+            <p>Relations:</p>
+            {{range $key, $value := .DatesLocations.DatesLocations}}
+                <p>{{$key}}</p>
+                <ul>
+                    {{range $value}}
+                        <li>{{.}}</li>
+                    {{end}}
+                </ul>
+            {{end}}
+            <!-- ---------------- Fin ------------------ -->
+        {{end}}
+    </div>
 </body>
 </html>
 `
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	// Call GetData() from Mod package
+	query := r.URL.Query().Get("query")
 	data, err := Mod.GetData()
 	if err != nil {
 		log.Fatalf("Erreur: %v", err)
 	}
 
-	// Load HTML template
-	t, err := template.New("webpage").Parse(tmpl)
-	if err != nil {
-		log.Fatalf("Erreur lors du chargement du template: %v", err)
+	filteredArtists := Mod.SearchBar(query, data)
+
+	pageData := PageData{
+		Query:   query,
+		Artists: filteredArtists,
 	}
 
-	// Render the template with data
-	err = t.Execute(w, data)
+	t, err := template.New("webpage").Parse(tmpl)
 	if err != nil {
-		log.Fatalf("Erreur lors du rendu du template: %v", err)
+		log.Fatalf("Error charging the template: %v", err)
+	}
+
+	err = t.Execute(w, pageData)
+	if err != nil {
+		log.Fatalf("Error with the template: %v", err)
 	}
 }
 
