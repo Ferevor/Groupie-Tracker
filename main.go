@@ -13,31 +13,63 @@ import (
 const tmpl = `
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Artist Info</title>
-	<link rel="stylesheet" type="text/css" href="/Styles/style.css">
-</head>
-<body>
-	<div>
-		<div class="header">
-			<h1>Groupie Tracker</h1>
+	<head>
+    	<title>Artist Info</title>
+		<link rel="stylesheet" type="text/css" href="/Styles/style.css">
+	</head>
+	<body>
+		<div>
+			<div class="header">
+				<h1>Groupie Tracker</h1>
+			</div>
+			<div class="box">
+    			<form name="search">
+        			<input type="text" class="input" name="txt" onmouseout="this.value = ''; this.blur();">
+    			</form>
+    			<i class="image.png"></i>
+			</div>
+			<div class="container">
+				{{range .}}
+            	<label for="modal-{{.Name}}" class="button">
+					<div>
+                		<img src="{{.Image}}" alt="Image" width="200" height="200">
+					</div>
+					<div>
+                		<h2>{{.Name}}</h2>
+					</div>
+            	</label>
+            	<input type="checkbox" id="modal-{{.Name}}" class="modal-toggle">
+            	<div class="modal">
+                	<div class="modal-content">
+                    	<label for="modal-{{.Name}}" class="close">&times;</label>
+						<div>
+                   			<center> <h2>{{.Name}}</h2></center>
+   						</div>
+   						<div class ="image">
+                			<center><img src="{{.Image}}" alt="Image" width="300" height="300"></center>
+						</div>
+						<div class="invisbox">
+							<p>Members: {{range .Members}}{{.}}, {{end}}</p>
+							<p>Creation Date: {{.CreationDate}}</p>
+							<p>First Album: {{.FirstAlbum}}</p>
+						</div>
+						<div class="invisbox">
+							<p>Concert Location and Dates:</p>
+        					{{range $key, $value := .DatesLocations.DatesLocations}}
+							<p>{{$key}}</p>
+          					<ul>
+                				{{range $value}}
+                  				<li>{{.}}</li>
+                   				{{end}}
+            				</ul>
+        					{{end}}
+						</div>
+                	</div>
+        		</div>
+        		{{end}}
+			</div>
 		</div>
-		<div class="box">
-  		 	 <form name="search">
-        		<input type="text" class="input" name="txt" onmouseout="this.value = ''; this.blur();">
-    		</form>
-    		<i class="image.png"></i>
-		</div>
-		<div class="container">
-			{{range .}}
-			<button class="button" onclick="window.location.href='{{.Image}}'">
-				<img src="{{.Image}}" alt="Image" width="200" height="200">
-				<h2>{{.Name}}</h2>
-			</button>
-			{{end}}
-		</div>
-	</div>
-</body>
+	</body>
 </html>
 `
 
@@ -63,6 +95,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Erreur lors du rendu du template: %v", err)
 		http.Error(w, "Erreur lors du rendu du template", http.StatusInternalServerError)
+		return
 	}
 }
 
