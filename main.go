@@ -30,14 +30,10 @@ const tmpl = `
 		</div>
 		<div class="container">
 			{{range .}}
-			<div class="card">
-				<div class="image">
-					<img src="{{.Image}}" alt="Image" width="200" height="200">
-				</div>
-				<div class="content">
-					<h2>{{.Name}}</h2>
-				</div>
-			</div>
+			<button class="button" onclick="window.location.href='{{.Image}}'">
+				<img src="{{.Image}}" alt="Image" width="200" height="200">
+				<h2>{{.Name}}</h2>
+			</button>
 			{{end}}
 		</div>
 	</div>
