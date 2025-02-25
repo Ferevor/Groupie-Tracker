@@ -30,14 +30,10 @@ const tmpl = `
 		</div>
 		<div class="container">
 			{{range .}}
-			<div class="card">
-				<div class="image">
-					<img src="{{.Image}}" alt="Image" width="200" height="200">
-				</div>
-				<div class="content">
-					<h2>{{.Name}}</h2>
-				</div>
-			</div>
+			<button class="button" onclick="window.location.href='{{.Image}}'">
+				<img src="{{.Image}}" alt="Image" width="200" height="200">
+				<h2>{{.Name}}</h2>
+			</button>
 			{{end}}
 		</div>
 	</div>
@@ -47,21 +43,26 @@ const tmpl = `
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	// Appeler la fonction GetArtist depuis GroupieTracker.go
-	data, err := Mod.GetArtist()
+	data, err := Mod.GetData()
 	if err != nil {
-		log.Fatalf("Erreur: %v", err)
+		log.Printf("Erreur lors de la récupération des données: %v", err)
+		http.Error(w, "Erreur lors de la récupération des données", http.StatusInternalServerError)
+		return
 	}
 
 	// Charger le template HTML
 	tmpl, err := template.New("webpage").Parse(tmpl)
 	if err != nil {
-		log.Fatalf("Erreur lors du chargement du template: %v", err)
+		log.Printf("Erreur lors du chargement du template: %v", err)
+		http.Error(w, "Erreur lors du chargement du template", http.StatusInternalServerError)
+		return
 	}
 
 	// Rendre le template avec les données
 	err = tmpl.Execute(w, data)
 	if err != nil {
-		log.Fatalf("Erreur lors du rendu du template: %v", err)
+		log.Printf("Erreur lors du rendu du template: %v", err)
+		http.Error(w, "Erreur lors du rendu du template", http.StatusInternalServerError)
 	}
 }
 
