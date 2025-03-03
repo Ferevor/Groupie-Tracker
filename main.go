@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os/exec"
 	"runtime"
+	"sort"
 )
 
 const tmpl = `
@@ -21,9 +22,16 @@ const tmpl = `
 		<div>
 			<div class="header">
 				<h1>Groupie Tracker</h1>
+				<div class="dropdown">
+                <button class="dropbtn">Sorts</button>
+                    <div class="dropdown-content">
+                         <a href="?sort=asc">Sort Name Ascending</a>
+                          <a href="?sort=desc">Sort Name Descending</a>
+                     </div>
+                </div>
 			</div>
 			<div class="box">
-    			<form name="search">
+    			<form method="search">
         			<input type="text" class="input" name="txt" onmouseout="this.value = ''; this.blur();">
     			</form>
     			<i class="image.png"></i>
@@ -80,6 +88,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Erreur lors de la récupération des données: %v", err)
 		http.Error(w, "Erreur lors de la récupération des données", http.StatusInternalServerError)
 		return
+	}
+
+	// Trier les artistes si le paramètre de tri est présent
+	sortOrder := r.URL.Query().Get("sort")
+	if sortOrder == "asc" {
+		sort.Slice(data, func(i, j int) bool {
+			return data[i].Name < data[j].Name
+		})
+	} else if sortOrder == "desc" {
+		sort.Slice(data, func(i, j int) bool {
+			return data[i].Name > data[j].Name
+		})
 	}
 
 	// Charger le template HTML
