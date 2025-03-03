@@ -1,36 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <link rel="stylesheet" href="test.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Search Bar</title>
+    <style>
+        #searchResults {
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+        }
+        .resultItem {
+            padding: 8px;
+            cursor: pointer;
+        }
+        .resultItem:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
 </head>
 <body>
-    <div class="navigater">
-        <input type="checkbox" class="navCheckBox" id="nav">
+    <input type="text" id="searchBar" placeholder="Search..." onkeyup="searchFunction()">
+    <div id="searchResults"></div>
 
-        <label for="nav" class="navBtn">
-            <span class="navIcon">&nbsp;</span>
-        </label>
+    <script>
+        const data = [
+            "Apple",
+            "Banana",
+            "Cherry",
+            "Date",
+            "Elderberry",
+            "Fig",
+            "Grape",
+            "Honeydew"
+        ];
 
-        <div class="navBg">&nbsp;</div>
-
-        <nav class="nav">
-            <ul class="navList">
-                <li>
-                    <div class="dropdown">
-                        <button class="dropbtn">Creation Year</button>
-                        <div class="dropdown-content">
-                            <a href="#">1900-1950</a>
-                            <a href="#">1951-2000</a>
-                            <a href="#">2001-2024</a>
-                        </div>
-                    </div>
-                </li><br>
-                <li><a href="#" class="liens">first album year</a></li><br>
-                <li><a href="#" class="liens">nomber of members</a></li><br>
-                <li><a href="#" class="liens">concert location</a></li>
-            </ul>
-        </nav>
-    </div>
+        function searchFunction() {
+            const input = document.getElementById('searchBar').value.toLowerCase();
+            const resultsContainer = document.getElementById('searchResults');
+            resultsContainer.innerHTML = '';
+            
+            if (input) {
+                const filteredData = data.filter(item => item.toLowerCase().includes(input));
+                filteredData.forEach(item => {
+                    const div = document.createElement('div');
+                    div.classList.add('resultItem');
+                    div.textContent = item;
+                    div.onclick = () => {
+                        document.getElementById('searchBar').value = item;
+                        resultsContainer.style.display = 'none';
+                    };
+                    resultsContainer.appendChild(div);
+                });
+                resultsContainer.style.display = 'block';
+            } else {
+                resultsContainer.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>

@@ -169,3 +169,21 @@ body {
   .dropdown:hover .dropbtn {
     background-color: #3e8e41;
   }
+
+  .suggestions {
+    border: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+    position: absolute;
+    width: 100%;
+}
+
+.suggestion-item {
+    background-color: white;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background-color: #eee;
+}

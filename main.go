@@ -37,8 +37,15 @@ const tmpl = `
 			</div>
 			<div class="box">
     			<form method="GET" action="/">
-        			<input type="text" class="input" name="query" value="{{.Query}}" onmouseout="this.value = ''; this.blur();">
-    			</form>
+    				<input type="text" class="input" list="fontstyle" name="query" value="{{.Query}}" autocomplete="off">
+  					<!-- ----------------------------- test with datalist ----------------------- -->
+  					<datalist id="fontstyle">
+    					<option value="acdc">acdc</option>
+    					<option value="alec">alec</option>
+  					</datalist>
+  					<!-- ----------------------------- end test with datalist ------------------- -->
+				</form>
+
     			<i class="image.png"></i>
 			</div>
 			<div class="container">
