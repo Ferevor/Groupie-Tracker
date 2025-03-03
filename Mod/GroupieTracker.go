@@ -77,18 +77,6 @@ func GetOneArtistInfo(name string) Artist {
 	return artInfo
 }
 
-func FiltersType(typeFilter string, art []Artist) {
-	if typeFilter == "by_creationDate" {
-		//art = Filter(art)
-	} else if typeFilter == "by_firstAlbum" {
-
-	} else if typeFilter == "by_nbrMembers" {
-
-	} else if typeFilter == "by_locationConcert" {
-
-	}
-}
-
 func RightFormForDate(date string) string {
 	date = strings.ReplaceAll(date, "/", "-")
 	return date
@@ -104,7 +92,7 @@ func memberMatch(query string, members []string) bool {
 }
 
 func locationMatch(query string, datesLocations map[string][]string) bool {
-	for location, _ := range datesLocations {
+	for location := range datesLocations {
 		if strings.Contains(strings.ToLower(string(location)), strings.ToLower(query)) {
 			return true
 		}
@@ -117,13 +105,13 @@ func SearchBar(query string, data []Artist) []Artist {
 	if query != "" {
 		for _, artist := range data {
 
-			if strings.Contains(strings.ToLower(artist.FirstAlbum), strings.ToLower(RightFormForDate(query))) ||
+			if strings.Contains(strings.ToLower(artist.Name), strings.ToLower(query)) {
+				filteredArtists = append([]Artist{artist}, filteredArtists...)
+			} else if strings.Contains(strings.ToLower(artist.FirstAlbum), strings.ToLower(RightFormForDate(query))) ||
 				strings.Contains(fmt.Sprintf("%d", artist.CreationDate), query) ||
 				locationMatch(query, artist.DatesLocations.DatesLocations) ||
 				memberMatch(query, artist.Members) {
 				filteredArtists = append(filteredArtists, artist)
-			} else if strings.Contains(strings.ToLower(artist.Name), strings.ToLower(query)) {
-				filteredArtists = append([]Artist{artist}, filteredArtists...)
 			}
 		}
 	} else {
