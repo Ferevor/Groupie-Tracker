@@ -14,70 +14,73 @@ import (
 const tmpl = `
 <!DOCTYPE html>
 <html>
-	<head>
-    	<title>Artist Info</title>
-		<link rel="stylesheet" type="text/css" href="/Styles/style.css">
-	</head>
-	<body>
-		<div>
-			<div class="header">
-				<h1>Groupie Tracker</h1>
-				<div class="dropdown">
-                <button class="dropbtn">Sorts</button>
-                    <div class="dropdown-content">
-                         <a href="?sort=asc">Sort Name Ascending</a>
-                          <a href="?sort=desc">Sort Name Descending</a>
-                     </div>
+    <head>
+        <title>Artist Info</title>
+        <link rel="stylesheet" type="text/css" href="/Styles/style.css">
+    </head>
+    <body>
+        <div>
+            <div class="header">
+                <h1>Groupie Tracker</h1>
+                <div class="button-container">
+                    <a href="/" class="buttonHome" role="button">Home</a>
+                    <div class="dropdown">
+                        <button class="dropbtn">Sorts</button>
+                        <div class="dropdown-content">
+                            <a href="?sort=asc">Sort Name Ascending</a>
+                            <a href="?sort=desc">Sort Name Descending</a>
+                        </div>
+                    </div>
                 </div>
-			</div>
-			<div class="box">
-    			<form method="search">
-        			<input type="text" class="input" name="txt" onmouseout="this.value = ''; this.blur();">
-    			</form>
-    			<i class="image.png"></i>
-			</div>
-			<div class="container">
-				{{range .}}
-            	<label for="modal-{{.Name}}" class="button">
-					<div>
-                		<img src="{{.Image}}" alt="Image" width="200" height="200">
-					</div>
-					<div>
-                		<h2>{{.Name}}</h2>
-					</div>
-            	</label>
-            	<input type="checkbox" id="modal-{{.Name}}" class="modal-toggle">
-            	<div class="modal">
-                	<div class="modal-content">
-                    	<label for="modal-{{.Name}}" class="close">&times;</label>
-						<div>
-                   			<center> <h2>{{.Name}}</h2></center>
-   						</div>
-   						<div class ="image">
-                			<center><img src="{{.Image}}" alt="Image" width="300" height="300"></center>
-						</div>
-						<div class="invisbox">
-							<p>Members: {{range .Members}}{{.}}, {{end}}</p>
-							<p>Creation Date: {{.CreationDate}}</p>
-							<p>First Album: {{.FirstAlbum}}</p>
-						</div>
-						<div class="invisbox">
-							<p>Concert Location and Dates:</p>
-        					{{range $key, $value := .DatesLocations.DatesLocations}}
-							<p>{{$key}}</p>
-          					<ul>
-                				{{range $value}}
-                  				<li>{{.}}</li>
-                   				{{end}}
-            				</ul>
-        					{{end}}
-						</div>
-                	</div>
-        		</div>
-        		{{end}}
-			</div>
-		</div>
-	</body>
+            </div>
+            <div class="box">
+                <form name="search">
+                    <input type="text" class="input" name="txt" onmouseout="this.value = ''; this.blur();">
+                </form>
+                <i class="image.png"></i>
+            </div>
+            <div class="container">
+                {{range .}}
+                <label for="modal-{{.Name}}" class="button">
+                    <div>
+                        <img src="{{.Image}}" alt="Image" width="200" height="200">
+                    </div>
+                    <div>
+                        <h2>{{.Name}}</h2>
+                    </div>
+                </label>
+                <input type="checkbox" id="modal-{{.Name}}" class="modal-toggle">
+                <div class="modal">
+                    <div class="modal-content" style="background-image: url('/Images/Vinyl.png'); background-size: contain; background-position: center; background-repeat: no-repeat; background-color: White;">
+                        <label for="modal-{{.Name}}" class="close">&times;</label>
+                        <div class="invisbox">
+                            <h2 class="modal-title">{{.Name}}</h2>
+                        </div>
+                        <div class="invisbox">
+                            <p>Members: {{range .Members}}{{.}}, {{end}}</p>
+                            <p>Creation Date: {{.CreationDate}}</p>
+                            <p>First Album: {{.FirstAlbum}}</p>
+                        </div>
+                        <div class="invisbox">
+                            <p>Concert Location and Dates:</p>
+                            {{range $key, $value := .DatesLocations.DatesLocations}}
+                            <p>{{$key}}</p>
+                              <ul>
+                                {{range $value}}
+                                  <li>{{.}}</li>
+                                   {{end}}
+                            </ul>
+                            {{end}}
+                        </div>
+                        <div class="album-image">
+                            <img src="{{.Image}}" alt="Album Image" style="height:340px;">
+                        </div>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </body>
 </html>
 `
 
@@ -140,10 +143,12 @@ func openBrowser(url string) {
 
 func main() {
 	http.Handle("/Styles/", http.StripPrefix("/Styles/", http.FileServer(http.Dir("Styles"))))
+	http.Handle("/Images/", http.StripPrefix("/Images/", http.FileServer(http.Dir("Images"))))
 	http.HandleFunc("/", handler)
 	fmt.Println("Starting server at port 8080")
 	go openBrowser("http://localhost:8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		fmt.Printf("Server failed to start: %v\n", err)
+		return
 	}
 }
