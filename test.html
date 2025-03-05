@@ -1,63 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Search Bar</title>
+    <title>Barre de recherche dynamique</title>
     <style>
         #searchResults {
             border: 1px solid #ccc;
-            max-height: 150px;
+            max-height: 200px;
             overflow-y: auto;
-            display: none;
         }
-        .resultItem {
+        .result-item {
             padding: 8px;
             cursor: pointer;
         }
-        .resultItem:hover {
+        .result-item:hover {
             background-color: #f0f0f0;
         }
     </style>
 </head>
 <body>
-    <input type="text" id="searchBar" placeholder="Search..." onkeyup="searchFunction()">
+    <input type="text" id="searchBox" placeholder="Rechercher...">
     <div id="searchResults"></div>
 
     <script>
-        const data = [
-            "Apple",
-            "Banana",
-            "Cherry",
-            "Date",
-            "Elderberry",
-            "Fig",
-            "Grape",
-            "Honeydew"
-        ];
-
-        function searchFunction() {
-            const input = document.getElementById('searchBar').value.toLowerCase();
-            const resultsContainer = document.getElementById('searchResults');
-            resultsContainer.innerHTML = '';
-            
-            if (input) {
-                const filteredData = data.filter(item => item.toLowerCase().includes(input));
-                filteredData.forEach(item => {
-                    const div = document.createElement('div');
-                    div.classList.add('resultItem');
-                    div.textContent = item;
-                    div.onclick = () => {
-                        document.getElementById('searchBar').value = item;
-                        resultsContainer.style.display = 'none';
-                    };
-                    resultsContainer.appendChild(div);
+        document.getElementById('searchBox').addEventListener('input', function() {
+            var query = this.value;
+            if (query.length > 0) {
+                fetch('/search?q=' + query)
+                .then(response => response.json())
+                .then(data => {
+                    var results = data.map(item => `<div class="result-item">${item}</div>`).join('');
+                    document.getElementById('searchResults').innerHTML = results;
                 });
-                resultsContainer.style.display = 'block';
             } else {
-                resultsContainer.style.display = 'none';
+                document.getElementById('searchResults').innerHTML = '';
             }
-        }
+        });
     </script>
 </body>
 </html>
