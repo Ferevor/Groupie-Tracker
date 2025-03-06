@@ -106,13 +106,13 @@ func locationMatch(query string, datesLocations map[string][]string) (bool, stri
 
 //TO DO LIST//
 //fare in modo di guardare se è gia esistente ~~~~~~~~
-//scrivere se è un membro
-//fare in modo che si possa cliccare sulle suggestioni come se fosse un enter ~~~~~~
+//scrivere se è un membro /////
+//fare in modo che si possa cliccare sulle suggestioni come se fosse un enter /////////
+//doesn't count the spaces
 
 func SearchOptions(query string, data []Artist) []string {
 	var optionsSearchBar []string
 
-	// Helper function to check if name exists in optionsSearchBar
 	contains := func(array []string, item string) bool {
 		for _, element := range array {
 			if element == item {
@@ -135,8 +135,8 @@ func SearchOptions(query string, data []Artist) []string {
 				optionsSearchBar = append(optionsSearchBar, artist.Name)
 			} else if locatbool && !contains(optionsSearchBar, locate) {
 				optionsSearchBar = append(optionsSearchBar, locate)
-			} else if mbrBool && !contains(optionsSearchBar, memberName) {
-				optionsSearchBar = append(optionsSearchBar, memberName)
+			} else if mbrBool && !contains(optionsSearchBar, memberName+" - Member") {
+				optionsSearchBar = append(optionsSearchBar, memberName+" - Member")
 			}
 		}
 	}
