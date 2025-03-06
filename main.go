@@ -33,52 +33,57 @@ const tmpl = `
 						<option value="">Filter By</option>
 						<option value="?filter=CreatioDate">Creation Date</option>
 					</select>
-					<input type="number" name="start_year" placeholder="De ">
-					<input type="number" name="end_year" placeholder="à ">
+					<input type="number" name="start" placeholder="De ">
+					<input type="number" name="end" placeholder="à ">
 					<button type="Submit">GO</button>
 				</form>
 			</div>
 			<div class="box">
     			<form name="search">
-        			<input type="text" class="input" name="txt" onmouseout="this.value = ''; this.blur();">
+        			<input type="text" class="input" name="txt" placeholder=" "/>
     			</form>
     			<i class="image.png"></i>
 			</div>
 			<div class="container">
-				{{range .}}
-            	<label for="modal-{{.Name}}" class="button">
-					<div>
-                		<img src="{{.Image}}" alt="Image" width="200" height="200">
+				{{if .No_results}}
+					<div class="no-results">
+						No results found
 					</div>
-					<div>
-                		<h2>{{.Name}}</h2>
-					</div>
-            	</label>
-            	<input type="checkbox" id="modal-{{.Name}}" class="modal-toggle">
-            	<div class="modal">
-                	<div class="modal-content">
-                    	<label for="modal-{{.Name}}" class="close">&times;</label>
+				{{end}}
+					{{range .Data}}
+            		<label for="modal-{{.Name}}" class="button">
 						<div>
-                   			<center> <h2>{{.Name}}</h2></center>
-   						</div>
-   						<div class ="image">
-                			<center><img src="{{.Image}}" alt="Image" width="192" height="192"></center>
+                			<img src="{{.Image}}" alt="Image" width="200" height="200">
 						</div>
-						<p>Members: {{range .Members}}{{.}}, {{end}}</p>
-						<p>Creation Date: {{.CreationDate}}</p>
-						<p>First Album: {{.FirstAlbum}}</p>
-						<p>Concert Location and Dates:</p>
-        				{{range $key, $value := .DatesLocations.DatesLocations}}
-						<p>{{$key}}</p>
-          				<ul>
-                			{{range $value}}
-                  			<li>{{.}}</li>
-                   			{{end}}
-            			</ul>
-        				{{end}}
+						<div>
+                			<h2>{{.Name}}</h2>
+						</div>
+            		</label>
+            		<input type="checkbox" id="modal-{{.Name}}" class="modal-toggle">
+            		<div class="modal">
+                		<div class="modal-content">
+                    		<label for="modal-{{.Name}}" class="close">&times;</label>
+							<div>
+                   				<center> <h2>{{.Name}}</h2></center>
+   							</div>
+   							<div class ="image">
+                				<center><img src="{{.Image}}" alt="Image" width="192" height="192"></center>
+							</div>
+							<p>Members: {{range .Members}}{{.}}, {{end}}</p>
+							<p>Creation Date: {{.CreationDate}}</p>
+							<p>First Album: {{.FirstAlbum}}</p>
+							<p>Concert Location and Dates:</p>
+        					{{range $key, $value := .DatesLocations.DatesLocations}}
+							<p>{{$key}}</p>
+          					<ul>
+                				{{range $value}}
+                  				<li>{{.}}</li>
+                   				{{end}}
+            				</ul>
+        					{{end}}
                 		</div>
-        		</div>
-        		{{end}}
+        			</div>
+				{{end}}
 			</div>
 		</div>
 	</body>
@@ -94,6 +99,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//log.Printf("Données récupérées: %v", data)
+
 	// Trier les artistes si le paramètre de tri est présent
 	sortOrder := r.URL.Query().Get("sort")
 	if sortOrder == "asc" {
@@ -107,16 +114,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Filtrer les artistes par date de création si les paramètres sont présents
-	startYearStr := r.URL.Query().Get("start_year")
-	endYearStr := r.URL.Query().Get("end_year")
-	if startYearStr != "" && endYearStr != "" {
-		startYear, err := strconv.Atoi(startYearStr)
+	start := r.URL.Query().Get("start")
+	end := r.URL.Query().Get("end")
+	if start != "" && end != "" {
+		startYear, err := strconv.Atoi(start)
 		if err != nil {
 			log.Printf("Erreur lors de la conversion de l'année de début: %v", err)
 			http.Error(w, "Erreur lors de la conversion de l'année de début", http.StatusInternalServerError)
 			return
 		}
-		endYear, err := strconv.Atoi(endYearStr)
+		endYear, err := strconv.Atoi(end)
 		if err != nil {
 			log.Printf("Erreur lors de la conversion de l'année de fin: %v", err)
 			http.Error(w, "Erreur lors de la conversion de l'année de fin", http.StatusInternalServerError)
@@ -124,13 +131,24 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var filteredData []Mod.Artist
-		for _, artist := range data {
-			creationYear := artist.CreationDate
-			if creationYear >= startYear && creationYear <= endYear {
-				filteredData = append(filteredData, artist)
+		switch r.URL.Query().Get("filter") {
+		case "CreationDate":
+			for _, artist := range data {
+				creationYear := artist.CreationDate
+				if creationYear >= startYear && creationYear <= endYear {
+					filteredData = append(filteredData, artist)
 			}
 		}
 		data = filteredData
+		log.Printf("Données filtrées: %v", filteredData)
+	}
+
+	var no_results bool
+	if len(data) == 0 {
+		no_results = true
+		log.Printf("Aucun résultat trouvé")
+	} else {
+		log.Printf("Des résultats ont été trouvés")
 	}
 
 	// Charger le template HTML
@@ -141,8 +159,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("Valeur de no_results: %v", no_results)
+
 	// Rendre le template avec les données
-	err = tmpl.Execute(w, data)
+	err = tmpl.Execute(w, map[string]interface{}{
+		"No_results": no_results,
+		"Data":       data,
+	})
+
 	if err != nil {
 		log.Printf("Erreur lors du rendu du template: %v", err)
 		http.Error(w, "Erreur lors du rendu du template", http.StatusInternalServerError)

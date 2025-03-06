@@ -59,23 +59,17 @@ body {
     transition: .5s;
 }
 
-.input:hover {
+.input:hover,
+.iput:focus {
     width: 200px;
     background: #3b3640;
     border-radius: 10px;
 }
-.box i{
-    position: absolute;
-    top: 50%;
-    right: 15px;
-    transform: translate(-50%,-50%);
-    font-size: 26px;
-    color: #ffd52d;
-    transition: .2s;
-}
-.box:hover i{
-    opacity: 0;
-    z-index: -1;
+
+.input:not(:placeholder-shown) {
+    width: 200px; /* L'input reste étendu */
+    background: #3b3640;
+    border-radius: 10px;
 }
 
 /* Modal styles */
@@ -117,4 +111,16 @@ body {
 }
 .modal-toggle:checked + .modal {
     display: block;
+}
+
+.no-results {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: aliceblue;
+    font-size: 20px;
+    border: 4px solid #ffd52d;
+    margin-top: 60px;
+    width: 30%;
+    height: 50px;
 }
