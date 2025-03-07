@@ -139,40 +139,41 @@ func handler(w http.ResponseWriter, r *http.Request) {
 				creationYear := artist.CreationDate
 				if creationYear >= startYear && creationYear <= endYear {
 					filteredData = append(filteredData, artist)
+				}
 			}
+			data = filteredData
+			log.Printf("Données filtrées: %v", filteredData)
 		}
-		data = filteredData
-		log.Printf("Données filtrées: %v", filteredData)
-	}
 
-	var no_results bool
-	if len(data) == 0 {
-		no_results = true
-		log.Printf("Aucun résultat trouvé")
-	} else {
-		log.Printf("Des résultats ont été trouvés")
-	}
+		var no_results bool
+		if len(data) == 0 {
+			no_results = true
+			log.Printf("Aucun résultat trouvé")
+		} else {
+			log.Printf("Des résultats ont été trouvés")
+		}
 
-	// Charger le template HTML
-	tmpl, err := template.New("webpage").Parse(tmpl)
-	if err != nil {
-		log.Printf("Erreur lors du chargement du template: %v", err)
-		http.Error(w, "Erreur lors du chargement du template", http.StatusInternalServerError)
-		return
-	}
+		// Charger le template HTML
+		tmpl, err := template.New("webpage").Parse(tmpl)
+		if err != nil {
+			log.Printf("Erreur lors du chargement du template: %v", err)
+			http.Error(w, "Erreur lors du chargement du template", http.StatusInternalServerError)
+			return
+		}
 
-	log.Printf("Valeur de no_results: %v", no_results)
+		log.Printf("Valeur de no_results: %v", no_results)
 
-	// Rendre le template avec les données
-	err = tmpl.Execute(w, map[string]interface{}{
-		"No_results": no_results,
-		"Data":       data,
-	})
+		// Rendre le template avec les données
+		err = tmpl.Execute(w, map[string]interface{}{
+			"No_results": no_results,
+			"Data":       data,
+		})
 
-	if err != nil {
-		log.Printf("Erreur lors du rendu du template: %v", err)
-		http.Error(w, "Erreur lors du rendu du template", http.StatusInternalServerError)
-		return
+		if err != nil {
+			log.Printf("Erreur lors du rendu du template: %v", err)
+			http.Error(w, "Erreur lors du rendu du template", http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
