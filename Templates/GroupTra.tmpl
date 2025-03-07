@@ -30,11 +30,8 @@
                 </div>
             </div>
             <div class="box">
-                <form name="search">
-                    <input type="text" class="input" name="txt" placeholder=" "/>
-                </form>
                 <form method="GET" action="/" id="searchForm">
-                    <input type="text" class="input" list="suggestionsquery" id="optionsList" name="displayQuery" value="{{.Query}}" autocomplete="off">
+                    <input type="text" class="input" list="suggestionsquery" id="optionsList" name="displayQuery" value="{{.Query}}" autocomplete="off" placeholder=" "/>
                     <input type="hidden" id="searchQuery" name="query">
                     <datalist id="suggestionsquery">
                     {{range .OptionsSearchBar}}
