@@ -59,13 +59,20 @@ body {
     transition: .5s;
 }
 
-.input:hover {
-    width: 150px;
+.input:hover,
+.iput:focus {
+    width: 200px;
     background: #3b3640;
     border-radius: 10px;
 }
 
-.box i {
+.input:not(:placeholder-shown) {
+    width: 200px; /* L'input reste étendu */
+    background: #3b3640;
+    border-radius: 10px;
+}
+
+/*.box i {
     position: absolute;
     top: 50%;
     right: 15px;
@@ -78,7 +85,7 @@ body {
 .box:hover i {
     opacity: 0;
     z-index: -1;
-}
+}*/
 
 .invisbox {
     position: relative;
