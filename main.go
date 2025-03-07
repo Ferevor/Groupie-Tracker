@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"runtime"
 	"sort"
+	"strconv"
 )
 
 const tmpl = `
@@ -31,6 +32,15 @@ const tmpl = `
                             <a href="?sort=desc">Sort Name Descending</a>
                         </div>
                     </div>
+					<form method="GET" action="/">
+					<select id="filter-select" name="filter">
+						<option value="">Filter By</option>
+						<option value="?filter=CreatioDate">Creation Date</option>
+					</select>
+						<input type="number" name="start" placeholder="De ">
+						<input type="number" name="end" placeholder="à ">
+					<button type="Submit">GO</button>
+				</form>
                 </div>
             </div>
             <div class="box">
@@ -105,6 +115,44 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
+	// Filtrer les artistes par date de création si les paramètres sont présents
+	start := r.URL.Query().Get("start")
+	end := r.URL.Query().Get("end")
+	if start != "" && end != "" {
+		startYear, err := strconv.Atoi(start)
+		if err != nil {
+			log.Printf("Erreur lors de la conversion de l'année de début: %v", err)
+			http.Error(w, "Erreur lors de la conversion de l'année de début", http.StatusInternalServerError)
+			return
+		}
+		endYear, err := strconv.Atoi(end)
+		if err != nil {
+			log.Printf("Erreur lors de la conversion de l'année de fin: %v", err)
+			http.Error(w, "Erreur lors de la conversion de l'année de fin", http.StatusInternalServerError)
+			return
+		}
+
+		var filteredData []Mod.Artist
+		switch r.URL.Query().Get("filter") {
+		case "CreationDate":
+			for _, artist := range data {
+				creationYear := artist.CreationDate
+				if creationYear >= startYear && creationYear <= endYear {
+					filteredData = append(filteredData, artist)
+			}
+		}
+		data = filteredData
+		log.Printf("Données filtrées: %v", filteredData)
+	}
+
+	var no_results bool
+	if len(data) == 0 {
+		no_results = true
+		log.Printf("Aucun résultat trouvé")
+	} else {
+		log.Printf("Des résultats ont été trouvés")
+	}
+
 	// Charger le template HTML
 	tmpl, err := template.New("webpage").Parse(tmpl)
 	if err != nil {
@@ -113,8 +161,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("Valeur de no_results: %v", no_results)
+
 	// Rendre le template avec les données
-	err = tmpl.Execute(w, data)
+	err = tmpl.Execute(w, map[string]interface{}{
+		"No_results": no_results,
+		"Data":       data,
+	})
+
 	if err != nil {
 		log.Printf("Erreur lors du rendu du template: %v", err)
 		http.Error(w, "Erreur lors du rendu du template", http.StatusInternalServerError)

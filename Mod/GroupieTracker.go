@@ -41,7 +41,22 @@ func GetInfo(url string) []byte {
 }
 
 func GetData() ([]Artist, error) {
+<<<<<<< HEAD
 	body := GetInfo("https://groupietrackers.herokuapp.com/api/artists")
+=======
+	url := "https://groupietrackers.herokuapp.com/api/artists"
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("Erreur lors de la requête GET: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("Erreur lors de la lecture du corps de la réponse: %v", err)
+	}
+>>>>>>> origin/ewan
 
 	var artists []Artist
 

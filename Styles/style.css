@@ -41,6 +41,7 @@ body {
 }
 
 .box {
+    justify-content: space-around;
     padding-top: 10px;
     background-color: #19161c;
     position: relative;
