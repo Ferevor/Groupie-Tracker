@@ -1,75 +1,80 @@
 <!-- Templates/template.tmpl -->
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Artist Info</title>
-    <link rel="stylesheet" type="text/css" href="/Styles/style.css">
-    <script src="/Scripts/GroupTra.js"></script>
-</head>
-<body>
-    <div>
-        <div class="header">
-            <h1>Groupie Tracker</h1>
-            <div class="dropdown">
-                <button class="dropbtn">Sorts</button>
-                <div class="dropdown-content">
-                    <a href="?sort=asc">Sort Name Ascending</a>
-                    <a href="?sort=desc">Sort Name Descending</a>
+    <head>
+        <title>Artist Info</title>
+        <link rel="stylesheet" type="text/css" href="/Styles/style.css">
+    </head>
+    <body>
+        <div>
+            <div class="header">
+                <h1>Groupie Tracker</h1>
+                <div class="button-container">
+                    <a href="/" class="buttonHome" role="button">Home</a>
+                    <div class="dropdown">
+                        <button class="dropbtn">Sorts</button>
+                        <div class="dropdown-content">
+                            <a href="?sort=asc">Sort Name Ascending</a>
+                            <a href="?sort=desc">Sort Name Descending</a>
+                        </div>
+                    </div>
+					<form method="GET" action="/">
+					<select id="filter-select" name="filter">
+						<option value="">Filter By</option>
+						<option value="?filter=CreatioDate">Creation Date</option>
+					</select>
+						<input type="number" name="start" placeholder="De ">
+						<input type="number" name="end" placeholder="à ">
+					<button type="Submit">GO</button>
+				</form>
                 </div>
             </div>
-        </div>
-        <div class="box">
-            <form method="GET" action="/" id="searchForm">
-                <input type="text" class="input" list="suggestionsquery" id="optionsList" name="displayQuery" value="{{.Query}}" autocomplete="off">
-                <input type="hidden" id="searchQuery" name="query">
-                <datalist id="suggestionsquery">
-                    {{range .OptionsSearchBar}}
-                        <option value="{{.}}">{{.}}</option>
-                    {{end}}
-                </datalist>
-            </form>
-            <i class="image.png"></i>
-        </div>
-        <div class="container">
-            {{range .Artists}}
-            <label for="modal-{{.Name}}" class="button">
-                <div>
-                    <img src="{{.Image}}" alt="Image" width="200" height="200">
-                </div>
-                <div>
-                    <h2>{{.Name}}</h2>
-                </div>
-            </label>
-            <input type="checkbox" id="modal-{{.Name}}" class="modal-toggle">
-            <div class="modal">
-                <div class="modal-content">
-                    <label for="modal-{{.Name}}" class="close">&times;</label>
+            <div class="box">
+                <form name="search">
+                    <input type="text" class="input" name="txt" placeholder=" "/>
+                </form>
+            </div>
+            <div class="container">
+                {{range .Artists}}
+                <label for="modal-{{.Name}}" class="button">
                     <div>
-                        <center> <h2>{{.Name}}</h2></center>
+                        <img src="{{.Image}}" alt="Image" width="200" height="200" style="border-top-left-radius: 9%; border-top-right-radius: 9%;">
                     </div>
-                    <div class="image">
-                        <center><img src="{{.Image}}" alt="Image" width="300" height="300"></center>
+                    <div>
+                        <h2>{{.Name}}</h2>
                     </div>
-                    <div class="invisbox">
-                        <p>Members: {{range .Members}}{{.}}, {{end}}</p>
-                        <p>Creation Date: {{.CreationDate}}</p>
-                        <p>First Album: {{.FirstAlbum}}</p>
-                    </div>
-                    <div class="invisbox">
-                        <p>Concert Location and Dates:</p>
-                        {{range $key, $value := .DatesLocations.DatesLocations}}
-                        <p>{{$key}}</p>
-                        <ul>
-                            {{range $value}}
-                            <li>{{.}}</li>
+                </label>
+                <input type="checkbox" id="modal-{{.Name}}" class="modal-toggle" tabindex="0">
+                <div class="modal">
+                    <div class="modal-content" style="background-image: url('/Images/Vinyl.png'); background-size: contain; background-position: center; background-repeat: no-repeat; background-color: White;">
+                        <label for="modal-{{.Name}}" class="close">&times;</label>
+                        <div class="invisbox">
+                            <h2 class="modal-title">{{.Name}}</h2>
+                        </div>
+                        <div class="invisbox">
+                            <p>Members: {{range .Members}}{{.}}, {{end}}</p>
+                            <p>Creation Date: {{.CreationDate}}</p>
+                            <p>First Album: {{.FirstAlbum}}</p>
+                        </div>
+                        <div class="invisbox">
+                            <p>Concert Location and Dates:</p>
+                            {{range $key, $value := .DatesLocations.DatesLocations}}
+                            <p>{{$key}}</p>
+                              <ul>
+                                {{range $value}}
+                                  <li>{{.}}</li>
+                                   {{end}}
+                            </ul>
                             {{end}}
-                        </ul>
-                        {{end}}
+                        </div>
+                        <div class="album-image">
+                            <img src="{{.Image}}" alt="Album Image" style="height:340px;">
+                        </div>
                     </div>
                 </div>
+                {{end}}
             </div>
-            {{end}}
         </div>
-    </div>
-</body>
+    </body>
 </html>
+`

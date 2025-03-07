@@ -40,6 +40,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			return data[i].Name > data[j].Name
 		})
 	}
+	filteredArtists := Mod.SearchBar(query, data)
+	optionSearchBar := Mod.SearchOptions(query, data)
+
+	pageData := PageData{
+		Query:            displayQuery,
+		Artists:          filteredArtists,
+		OptionsSearchBar: optionSearchBar,
+	}
 
 	// Filtrer les artistes par date de création si les paramètres sont présents
 	start := r.URL.Query().Get("start")
@@ -81,14 +89,20 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Charger le template HTML
-	tmpl, err := template.New("webpage").Parse(tmpl)
+	t, err := template.ParseFiles("Templates/grouptra.tmpl")
 	if err != nil {
 		log.Printf("Erreur lors du chargement du template: %v", err)
 		http.Error(w, "Erreur lors du chargement du template", http.StatusInternalServerError)
 		return
 	}
 
-	err = t.Execute(w, pageData)
+	log.Printf("Valeur de noresult = %v", no_results)
+
+	err = t.Execute(w, pageData) /* map[string]interface{}{
+		"No_results": no_results,
+		"Data":       pageData,
+	})*/
+
 	if err != nil {
 		log.Printf("Erreur lors du rendu du template: %v", err)
 		http.Error(w, "Erreur lors du rendu du template", http.StatusInternalServerError)

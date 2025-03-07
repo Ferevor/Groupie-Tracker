@@ -104,12 +104,6 @@ func locationMatch(query string, datesLocations map[string][]string) (bool, stri
 	return false, locate
 }
 
-//TO DO LIST//
-//fare in modo di guardare se è gia esistente ~~~~~~~~
-//scrivere se è un membro /////
-//fare in modo che si possa cliccare sulle suggestioni come se fosse un enter /////////
-//doesn't count the spaces
-
 func SearchOptions(query string, data []Artist) []string {
 	var optionsSearchBar []string
 
