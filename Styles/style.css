@@ -1,6 +1,8 @@
 body {
     display: flex;
     flex-direction: column;
+    display: flex;
+    flex-direction: column;
     margin: 0;
     background-color: #19161c;
 }
@@ -24,7 +26,23 @@ body {
     position: relative;
     border: 4px solid #ffd52d;
     background-color: #433131;
+.button {
+    position: relative;
+    border: 4px solid #ffd52d;
+    background-color: #433131;
     color: white;
+    text-align: center;
+    width: 200px;
+    height: 300px;
+    margin-top: 35px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.name {
     text-align: center;
     width: 200px;
     height: 300px;
@@ -319,4 +337,14 @@ body {
 
 .dropdown:hover .dropbtn {
     background-color: #ffd52d;
+}
+
+.suggestion-item {
+    background-color: white;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background-color: #eee;
 }

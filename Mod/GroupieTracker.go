@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type Artist struct {
@@ -15,8 +16,6 @@ type Artist struct {
 	Members        []string `json:"members"`
 	CreationDate   int      `json:"creationDate"`
 	FirstAlbum     string   `json:"firstAlbum"`
-	Location       string   `json:"location"`
-	ConcertDates   string   `json:"concertDates"`
 	Relations      string   `json:"relations"`
 	DatesLocations Relation
 }
@@ -60,4 +59,110 @@ func GetData() ([]Artist, error) {
 		artists[i].DatesLocations = relation
 	}
 	return artists, nil
+}
+
+func GetOneArtistInfo(name string) Artist {
+	art, _ := GetData()
+	var artInfo Artist
+	for i := range art {
+		if art[i].Name == name {
+			artInfo.Image = art[i].Image
+			artInfo.Name = art[i].Name
+			artInfo.Members = art[i].Members
+			artInfo.CreationDate = art[i].CreationDate
+			artInfo.FirstAlbum = art[i].FirstAlbum
+			artInfo.DatesLocations = art[i].DatesLocations
+		}
+	}
+	return artInfo
+}
+
+func RightFormForDate(date string) string {
+	date = strings.ReplaceAll(date, "/", "-")
+	return date
+}
+
+func memberMatch(query string, members []string) (bool, string) {
+	memberName := ""
+	for _, member := range members {
+		if strings.Contains(strings.ToLower(member), strings.ToLower(query)) {
+			memberName = member
+			return true, memberName
+		}
+	}
+	return false, memberName
+}
+
+func locationMatch(query string, datesLocations map[string][]string) (bool, string) {
+	locate := ""
+	for location := range datesLocations {
+		if strings.Contains(strings.ToLower(string(location)), strings.ToLower(query)) {
+			locate = string(location)
+			return true, locate
+		}
+	}
+	return false, locate
+}
+
+//TO DO LIST//
+//fare in modo di guardare se è gia esistente ~~~~~~~~
+//scrivere se è un membro /////
+//fare in modo che si possa cliccare sulle suggestioni come se fosse un enter /////////
+//doesn't count the spaces
+
+func SearchOptions(query string, data []Artist) []string {
+	var optionsSearchBar []string
+
+	contains := func(array []string, item string) bool {
+		for _, element := range array {
+			if element == item {
+				return true
+			}
+		}
+		return false
+	}
+
+	if query != "" {
+		for _, artist := range data {
+			mbrBool, memberName := memberMatch(query, artist.Members)
+			locatbool, locate := locationMatch(query, artist.DatesLocations.DatesLocations)
+
+			if strings.Contains(strings.ToLower(artist.Name), strings.ToLower(query)) && !contains(optionsSearchBar, artist.Name) {
+				optionsSearchBar = append(optionsSearchBar, artist.Name)
+			} else if strings.Contains(strings.ToLower(artist.FirstAlbum), strings.ToLower(RightFormForDate(query))) && !contains(optionsSearchBar, artist.Name) {
+				optionsSearchBar = append(optionsSearchBar, artist.Name)
+			} else if strings.Contains(fmt.Sprintf("%d", artist.CreationDate), query) && !contains(optionsSearchBar, artist.Name) {
+				optionsSearchBar = append(optionsSearchBar, artist.Name)
+			} else if locatbool && !contains(optionsSearchBar, locate) {
+				optionsSearchBar = append(optionsSearchBar, locate)
+			} else if mbrBool && !contains(optionsSearchBar, memberName+" - Member") {
+				optionsSearchBar = append(optionsSearchBar, memberName+" - Member")
+			}
+		}
+	}
+	return optionsSearchBar
+}
+
+func SearchBar(query string, data []Artist) []Artist {
+	var filteredArtists []Artist
+	if query != "" {
+		for _, artist := range data {
+
+			mbrBool, _ := memberMatch(query, artist.Members)
+			locatbool, _ := locationMatch(query, artist.DatesLocations.DatesLocations)
+
+			if strings.Contains(strings.ToLower(artist.Name), strings.ToLower(query)) {
+				filteredArtists = append([]Artist{artist}, filteredArtists...)
+			} else if strings.Contains(strings.ToLower(artist.FirstAlbum), strings.ToLower(RightFormForDate(query))) ||
+				strings.Contains(fmt.Sprintf("%d", artist.CreationDate), query) ||
+				locatbool ||
+				mbrBool {
+				filteredArtists = append(filteredArtists, artist)
+
+			}
+		}
+	} else {
+		filteredArtists = data
+	}
+	return filteredArtists
 }
