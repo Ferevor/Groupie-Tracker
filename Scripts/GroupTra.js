@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var optionsList = document.getElementById('optionsList'); 
     var searchQuery = document.getElementById('searchQuery');
     
+
     optionsList.addEventListener('input', function() { 
         var query = this.value; 
         if (query.length > 0) { 
@@ -15,13 +16,16 @@ document.addEventListener("DOMContentLoaded", function() {
     }); 
 
     optionsList.addEventListener('change', function() { 
-        var cleanedQuery = this.value.replace(/ - Member$/, ""); 
-        searchQuery.value = cleanedQuery;
+        cleanQuery(this.value, searchQuery);
         this.form.submit(); 
     }); 
 
     optionsList.addEventListener('blur', function() { 
-        var cleanedQuery = this.value.replace(/ - Member$/, ""); 
-        searchQuery.value = cleanedQuery;
+        cleanQuery(this.value, searchQuery);
     });
 });
+
+function cleanQuery(value, searchQueryElement) {
+    var cleanedQuery = value.replace(/ - Member$/, ""); 
+    searchQueryElement.value = cleanedQuery;
+}
