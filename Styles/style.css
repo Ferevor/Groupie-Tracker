@@ -67,7 +67,7 @@ body {
 }
 
 .input:not(:placeholder-shown) {
-    width: 200px; /* L'input reste étendu */
+    width: 200px;
     background: #3b3640;
     border-radius: 10px;
 }

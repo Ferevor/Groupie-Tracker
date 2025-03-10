@@ -23,15 +23,15 @@ const tmpl = `
 		<div>
 			<div class="header">
 				<h1>Groupie Tracker</h1>
-				<select id="sort-select" name="sort" onchange="location = this.value;">
-                    <option value="">Sort By</option>
-                    <option value="?sort=asc">Sort Ascending</option>
-                    <option value="?sort=desc">Sort Descending</option>
-                </select>
 				<form method="GET" action="/">
+					<select id="sort-select" name="sort">
+                		<option value="">Sort By</option>
+                		<option value="asc">Sort Ascending</option>
+                	    <option value="desc">Sort Descending</option>
+                	</select>
 					<select id="filter-select" name="filter">
 						<option value="">Filter By</option>
-						<option value="?filter=CreatioDate">Creation Date</option>
+						<option value="CreationDate">Creation Date</option>
 					</select>
 					<input type="number" name="start" placeholder="De ">
 					<input type="number" name="end" placeholder="à ">
@@ -40,9 +40,8 @@ const tmpl = `
 			</div>
 			<div class="box">
     			<form name="search">
-        			<input type="text" class="input" name="txt" placeholder=" "/>
+        			<input type="text" class="input" list="suggestionsquery" id="optionsList" name="displayQuery" value="{{.Query}}" autocomplete="off" placeholder=" ">
     			</form>
-    			<i class="image.png"></i>
 			</div>
 			<div class="container">
 				{{if .No_results}}
@@ -50,7 +49,7 @@ const tmpl = `
 						No results found
 					</div>
 				{{end}}
-					{{range .Data}}
+				{{range .Data}}
             		<label for="modal-{{.Name}}" class="button">
 						<div>
                 			<img src="{{.Image}}" alt="Image" width="200" height="200">
@@ -101,23 +100,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	//log.Printf("Données récupérées: %v", data)
 
-	// Trier les artistes si le paramètre de tri est présent
 	sortOrder := r.URL.Query().Get("sort")
-	if sortOrder == "asc" {
-		sort.Slice(data, func(i, j int) bool {
-			return data[i].Name < data[j].Name
-		})
-	} else if sortOrder == "desc" {
-		sort.Slice(data, func(i, j int) bool {
-			return data[i].Name > data[j].Name
-		})
-	}
-
-	// Filtrer les artistes par date de création si les paramètres sont présents
 	start := r.URL.Query().Get("start")
 	end := r.URL.Query().Get("end")
-	if start != "" && end != "" {
-		startYear, err := strconv.Atoi(start)
+
+	// Filtrer les artistes par date de création si les paramètres sont présents
+
+	if start != "" && end != "" { // Si les paramètres sont présents
+		startYear, err := strconv.Atoi(start) // Convertir les paramètres en entiers
 		if err != nil {
 			log.Printf("Erreur lors de la conversion de l'année de début: %v", err)
 			http.Error(w, "Erreur lors de la conversion de l'année de début", http.StatusInternalServerError)
@@ -134,13 +124,24 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Query().Get("filter") {
 		case "CreationDate":
 			for _, artist := range data {
-				creationYear := artist.CreationDate
-				if creationYear >= startYear && creationYear <= endYear {
-					filteredData = append(filteredData, artist)
+				if artist.CreationDate >= startYear && artist.CreationDate <= endYear { //si l'année de création est comprise entre les années de début et de fin
+					filteredData = append(filteredData, artist) // Ajouter l'artiste à la liste des artistes filtrés
+				}
 			}
+			data = filteredData // Remplacer les données par les données filtrées
+			log.Printf("Données filtrées: %v", filteredData)
 		}
-		data = filteredData
-		log.Printf("Données filtrées: %v", filteredData)
+	}
+
+	// Trier les artistes si le paramètre de tri est présent
+	if sortOrder == "asc" {
+		sort.Slice(data, func(i, j int) bool {
+			return data[i].Name < data[j].Name
+		})
+	} else if sortOrder == "desc" {
+		sort.Slice(data, func(i, j int) bool {
+			return data[i].Name > data[j].Name
+		})
 	}
 
 	var no_results bool
@@ -200,5 +201,6 @@ func main() {
 	go openBrowser("http://localhost:8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		fmt.Printf("Server failed to start: %v\n", err)
+		return
 	}
 }

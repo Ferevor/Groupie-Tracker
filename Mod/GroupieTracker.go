@@ -62,7 +62,3 @@ func GetData() ([]Artist, error) {
 
 	return artists, nil
 }
-
-func ArtistInfo(name string) {
-
-}
