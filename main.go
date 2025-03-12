@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 const tmpl = `
@@ -32,10 +33,12 @@ const tmpl = `
 					<select id="filter-select" name="filter">
 						<option value="">Filter By</option>
 						<option value="CreationDate">Creation Date</option>
+						<option value="FirstAlbum">First Album</option>
 					</select>
 					<input type="number" name="start" placeholder="De ">
 					<input type="number" name="end" placeholder="à ">
 					<button type="Submit">GO</button>
+
 				</form>
 			</div>
 			<div class="box">
@@ -125,6 +128,19 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		case "CreationDate":
 			for _, artist := range data {
 				if artist.CreationDate >= startYear && artist.CreationDate <= endYear { //si l'année de création est comprise entre les années de début et de fin
+					filteredData = append(filteredData, artist) // Ajouter l'artiste à la liste des artistes filtrés
+				}
+			}
+		case "FirstAlbum":
+			for _, artist := range data {
+				firstAlbumYear := strings.Split(artist.FirstAlbum, "-")   // Diviser la chaîne de l'année du premier album pour avoir seulement l'année
+				firstAlbumYearInt, err := strconv.Atoi(firstAlbumYear[2]) //convertir l'année en entier
+				if err != nil {
+					log.Printf("Erreur lors de la conversion de l'année du premier album: %v", err)
+					http.Error(w, "Erreur lors de la conversion de l'année du premier album", http.StatusInternalServerError)
+					return
+				}
+				if firstAlbumYearInt >= startYear && firstAlbumYearInt <= endYear { //si l'année du premier album est comprise entre les années de début et de fin
 					filteredData = append(filteredData, artist) // Ajouter l'artiste à la liste des artistes filtrés
 				}
 			}
