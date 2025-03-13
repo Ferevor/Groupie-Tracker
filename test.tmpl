@@ -1,0 +1,44 @@
+<body>
+    <div class="dropdown">
+        <button class="dropbtn">Filter</button>
+        <div class="dropdown-content">
+            <label>
+                <input type="checkbox" name="filter" value="creation_date" onclick="sendToServer('creation_date')">
+                Creation date
+            </label>
+            <label>
+                <input type="checkbox" name="filter" value="first_album_year" onclick="sendToServer('first_album_year')">
+                First Album Year
+            </label>
+            <label>
+                <input type="checkbox" name="filter" value="members" onclick="sendToServer('members')">
+                Number of members
+            </label>
+            <label>
+                <input type="checkbox" name="filter" value="location" onclick="sendToServer('location')">
+                Concert location
+            </label>
+        </div>
+    </div>
+</body>
+<script>
+    function sendToServer(option) {
+        fetch('http://localhost:8080/option', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ option: option })
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('Option sent successfully:', option);
+            } else {
+                console.error('Error sending option:', response.statusText);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+</script>
