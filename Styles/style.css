@@ -13,6 +13,9 @@ body {
     padding: 10px;
     z-index: 1;
     color: #19161c;
+    border-radius: 15px; /* Coins arrondis */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombre portée */
+    margin: 20px; /* Marge autour du header */
 }
 
 .container {
@@ -177,10 +180,10 @@ body {
 
 /*Button css + glitch effect */
 .buttonHome, .dropbtn {
-    width: 150px;
-    height: 76px;
-    line-height: 78px;
-    font-size: 20px;
+    width: 100px;
+    height: 50px;
+    line-height: 40px;
+    font-size: 14px;
     font-family: 'Bebas Neue', sans-serif;
     background: linear-gradient(45deg, transparent 5%, #433131 5%);
     border: 0;
@@ -193,6 +196,8 @@ body {
     -webkit-user-select: none;
     touch-action: manipulation;
     text-decoration: none;
+    border-top-left-radius: 5%;
+    border-top-right-radius: 5%;
 }
 
 .buttonHome:after, .dropbtn:after {
@@ -311,6 +316,15 @@ body {
     background-color: #ffd52d;
 }
 
+/*/////////////////////////////////////*/
+.dropdown-content label {
+    color: black;
+    padding: 12px 16px;
+    display: block;
+}  
+
+/*/////////////////////////////////////*/
+
 .suggestion-item {
     background-color: white;
     padding: 10px;
@@ -331,4 +345,21 @@ body {
     margin-top: 60px;
     width: 30%;
     height: 50px;
+}
+
+/* test bouton filtre */
+.filter-button, .sort-button {
+    width: 100px; 
+    height: 40px; 
+    font-size: 14px; 
+    margin-left: 10px;
+    margin-right: 10px;
+    background-color: #ffd52d; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+}
+
+.filter-button:hover, .sort-button:hover {
+    background-color: #e6c200; 
 }

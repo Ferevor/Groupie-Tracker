@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -61,6 +62,7 @@ func GetData() ([]Artist, error) {
 	return artists, nil
 }
 
+// /// on peux enlever cette fonction du code sauf si vous l'utilisez moi non
 func GetOneArtistInfo(name string) Artist {
 	art, _ := GetData()
 	var artInfo Artist
@@ -82,26 +84,25 @@ func RightFormForDate(date string) string {
 	return date
 }
 
-func memberMatch(query string, members []string) (bool, string) {
-	memberName := ""
-	for _, member := range members {
-		if strings.Contains(strings.ToLower(member), strings.ToLower(query)) {
-			memberName = member
-			return true, memberName
+func GetBool(query string, datesLocations map[string][]string, members []string) (bool, string) {
+	value := ""
+	if members != nil {
+		for _, member := range members {
+			if strings.Contains(strings.ToLower(member), strings.ToLower(query)) {
+				value = member
+				return true, value
+			}
 		}
-	}
-	return false, memberName
-}
+	} else {
+		for location := range datesLocations {
+			if strings.Contains(strings.ToLower(string(location)), strings.ToLower(query)) {
+				value = string(location)
+				return true, value
+			}
+		}
 
-func locationMatch(query string, datesLocations map[string][]string) (bool, string) {
-	locate := ""
-	for location := range datesLocations {
-		if strings.Contains(strings.ToLower(string(location)), strings.ToLower(query)) {
-			locate = string(location)
-			return true, locate
-		}
 	}
-	return false, locate
+	return false, value
 }
 
 func SearchOptions(query string, data []Artist) []string {
@@ -118,8 +119,8 @@ func SearchOptions(query string, data []Artist) []string {
 
 	if query != "" {
 		for _, artist := range data {
-			mbrBool, memberName := memberMatch(query, artist.Members)
-			locatbool, locate := locationMatch(query, artist.DatesLocations.DatesLocations)
+			mbrBool, memberName := GetBool(query, nil, artist.Members)
+			locatbool, locate := GetBool(query, artist.DatesLocations.DatesLocations, nil)
 
 			if strings.Contains(strings.ToLower(artist.Name), strings.ToLower(query)) && !contains(optionsSearchBar, artist.Name) {
 				optionsSearchBar = append(optionsSearchBar, artist.Name)
@@ -137,13 +138,68 @@ func SearchOptions(query string, data []Artist) []string {
 	return optionsSearchBar
 }
 
+func SearchBarCheckBox(values []string, query string, data []Artist) []Artist {
+	var filteredArtists []Artist
+	if len(values) == 0 {
+		return SearchBar(query, data)
+	}
+
+	if len(values) == 1 {
+		switch {
+		case values[0] == "location":
+			for _, artist := range data {
+				locatbool, _ := GetBool(query, artist.DatesLocations.DatesLocations, nil)
+				if locatbool {
+					filteredArtists = append(filteredArtists, artist)
+				}
+
+			}
+			return filteredArtists
+		case values[0] == "members":
+			for _, artist := range data {
+				if query == string(strconv.Itoa(len(artist.Members))) {
+					filteredArtists = append(filteredArtists, artist)
+				}
+			}
+			return filteredArtists
+		case values[0] == "first_album_year":
+			for _, artist := range data {
+				if strings.Contains(strings.ToLower(artist.FirstAlbum), strings.ToLower(RightFormForDate(query))) {
+					filteredArtists = append(filteredArtists, artist)
+				}
+			}
+			return filteredArtists
+		case values[0] == "creation_date":
+			for _, artist := range data {
+				if strings.Contains(fmt.Sprintf("%d", artist.CreationDate), query) {
+					filteredArtists = append(filteredArtists, artist)
+				}
+			}
+			return filteredArtists
+		}
+
+	}
+
+	if len(values) == 2 && Contains(values, "creation_date") && Contains(values, "first_album_year") {
+		for _, artist := range data {
+			if strings.Contains(fmt.Sprintf("%d", artist.CreationDate), query) ||
+				strings.Contains(strings.ToLower(artist.FirstAlbum), strings.ToLower(RightFormForDate(query))) {
+				filteredArtists = append(filteredArtists, artist)
+			}
+		}
+		return filteredArtists
+	}
+	return nil
+
+}
+
 func SearchBar(query string, data []Artist) []Artist {
 	var filteredArtists []Artist
 	if query != "" {
 		for _, artist := range data {
 
-			mbrBool, _ := memberMatch(query, artist.Members)
-			locatbool, _ := locationMatch(query, artist.DatesLocations.DatesLocations)
+			mbrBool, _ := GetBool(query, nil, artist.Members)
+			locatbool, _ := GetBool(query, artist.DatesLocations.DatesLocations, nil)
 
 			if strings.Contains(strings.ToLower(artist.Name), strings.ToLower(query)) {
 				filteredArtists = append([]Artist{artist}, filteredArtists...)
@@ -159,4 +215,22 @@ func SearchBar(query string, data []Artist) []Artist {
 		filteredArtists = data
 	}
 	return filteredArtists
+}
+
+func RemoveFromCheckedOptions(slice []string, value string) []string {
+	for i, v := range slice {
+		if v == value {
+			return append(slice[:i], slice[i+1:]...)
+		}
+	}
+	return slice
+}
+
+func Contains(slice []string, value string) bool {
+	for _, item := range slice {
+		if item == value {
+			return true
+		}
+	}
+	return false
 }

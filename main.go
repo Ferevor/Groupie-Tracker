@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"groupie/Mod"
 	"html/template"
@@ -9,14 +10,16 @@ import (
 	"os/exec"
 	"runtime"
 	"sort"
-	"strconv"
 )
 
 type PageData struct {
 	Query            string
 	Artists          []Mod.Artist
 	OptionsSearchBar []string
+	CheckedOptions   []string
 }
+
+var checkedOptions = []string{}
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("query")
@@ -24,12 +27,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	data, err := Mod.GetData()
 	if err != nil {
-		log.Printf("Erreur lors de la récupération des données: %v", err)
-		http.Error(w, "Erreur lors de la récupération des données", http.StatusInternalServerError)
+		log.Printf("Error fetching data: %v", err)
+		http.Error(w, "Error fetching data", http.StatusInternalServerError)
 		return
 	}
 
-	// Trier les artistes si le paramètre de tri est présent
 	sortOrder := r.URL.Query().Get("sort")
 	if sortOrder == "asc" {
 		sort.Slice(data, func(i, j int) bool {
@@ -40,82 +42,67 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			return data[i].Name > data[j].Name
 		})
 	}
-	filteredArtists := Mod.SearchBar(query, data)
-	optionSearchBar := Mod.SearchOptions(query, data)
+
+	filteredArtists := Mod.SearchBarCheckBox(checkedOptions, query, data)
+	optionsSearchBar := Mod.SearchOptions(query, data)
 
 	pageData := PageData{
 		Query:            displayQuery,
 		Artists:          filteredArtists,
-		OptionsSearchBar: optionSearchBar,
+		OptionsSearchBar: optionsSearchBar,
+		CheckedOptions:   checkedOptions,
 	}
 
-	// Filtrer les artistes par date de création si les paramètres sont présents
-	start := r.URL.Query().Get("start")
-	end := r.URL.Query().Get("end")
-	if start != "" && end != "" {
-		startYear, err := strconv.Atoi(start)
-		if err != nil {
-			log.Printf("Erreur lors de la conversion de l'année de début: %v", err)
-			http.Error(w, "Erreur lors de la conversion de l'année de début", http.StatusInternalServerError)
-			return
-		}
-		endYear, err := strconv.Atoi(end)
-		if err != nil {
-			log.Printf("Erreur lors de la conversion de l'année de fin: %v", err)
-			http.Error(w, "Erreur lors de la conversion de l'année de fin", http.StatusInternalServerError)
-			return
-		}
-
-		var filteredData []Mod.Artist
-		switch r.URL.Query().Get("filter") {
-		case "CreationDate":
-			for _, artist := range data {
-				creationYear := artist.CreationDate
-				if creationYear >= startYear && creationYear <= endYear {
-					filteredData = append(filteredData, artist)
-				}
-			}
-			data = filteredData
-			log.Printf("Données filtrées: %v", filteredData)
-		}
+	t := template.New("GroupTra.tmpl").Funcs(template.FuncMap{
+		"contains": Mod.Contains,
+	})
+	t, err = t.ParseFiles("Templates/GroupTra.tmpl")
+	if err != nil {
+		log.Printf("Error loading template: %v", err)
+		http.Error(w, "Error loading template", http.StatusInternalServerError)
+		return
 	}
 
-	var no_results bool
-	if len(data) == 0 {
-		no_results = true
-		log.Printf("Aucun résultat trouvé")
+	err = t.Execute(w, pageData)
+	if err != nil {
+		log.Printf("Error rendering template: %v", err)
+		http.Error(w, "Error rendering template", http.StatusInternalServerError)
+		return
+	}
+}
+
+func getCheckedOptionsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string][]string{"checkedOptions": checkedOptions})
+}
+
+func updateCheckedOptionsHandler(w http.ResponseWriter, r *http.Request) {
+	var selection struct {
+		Option    string `json:"option"`
+		IsChecked bool   `json:"isChecked"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&selection); err != nil {
+		http.Error(w, "Invalid data", http.StatusBadRequest)
+		return
+	}
+
+	if selection.IsChecked {
+		if !Mod.Contains(checkedOptions, selection.Option) {
+			checkedOptions = append(checkedOptions, selection.Option)
+		}
 	} else {
-		log.Printf("Des résultats ont été trouvés")
+		checkedOptions = Mod.RemoveFromCheckedOptions(checkedOptions, selection.Option)
 	}
 
-	// Charger le template HTML
-	t, err := template.ParseFiles("Templates/grouptra.tmpl")
-	if err != nil {
-		log.Printf("Erreur lors du chargement du template: %v", err)
-		http.Error(w, "Erreur lors du chargement du template", http.StatusInternalServerError)
-		return
-	}
-
-	log.Printf("Valeur de noresult = %v", no_results)
-
-	err = t.Execute(w, pageData) /* map[string]interface{}{
-		"No_results": no_results,
-		"Data":       pageData,
-	})*/
-
-	if err != nil {
-		log.Printf("Erreur lors du rendu du template: %v", err)
-		http.Error(w, "Erreur lors du rendu du template", http.StatusInternalServerError)
-		return
-	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func searchOptionsHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("q")
 	data, err := Mod.GetData()
 	if err != nil {
-		log.Printf("Erreur lors de la récupération des données: %v", err)
-		http.Error(w, "Erreur lors de la récupération des données", http.StatusInternalServerError)
+		log.Printf("Error fetching data: %v", err)
+		http.Error(w, "Error fetching data", http.StatusInternalServerError)
 		return
 	}
 	optionsSearchBar := Mod.SearchOptions(query, data)
@@ -132,7 +119,6 @@ func searchOptionsHandler(w http.ResponseWriter, r *http.Request) {
 
 func openBrowser(url string) {
 	var err error
-
 	switch os := runtime.GOOS; os {
 	case "linux":
 		err = exec.Command("xdg-open", url).Start()
@@ -143,7 +129,6 @@ func openBrowser(url string) {
 	default:
 		err = fmt.Errorf("unsupported platform")
 	}
-
 	if err != nil {
 		fmt.Printf("Failed to open browser: %v\n", err)
 	}
@@ -153,11 +138,12 @@ func main() {
 	http.Handle("/Styles/", http.StripPrefix("/Styles/", http.FileServer(http.Dir("Styles"))))
 	http.Handle("/Scripts/", http.StripPrefix("/Scripts/", http.FileServer(http.Dir("Scripts"))))
 	http.HandleFunc("/", handler)
+	http.HandleFunc("/get-checked-options", getCheckedOptionsHandler)
+	http.HandleFunc("/update-checked-options", updateCheckedOptionsHandler)
 	http.HandleFunc("/search", searchOptionsHandler)
 	fmt.Println("Starting server at port 8080")
 	go openBrowser("http://localhost:8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		fmt.Printf("Server failed to start: %v\n", err)
-		return
 	}
 }
