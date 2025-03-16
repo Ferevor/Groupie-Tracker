@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"groupie/Mod"
 	"html/template"
@@ -15,7 +16,10 @@ type PageData struct {
 	Query            string
 	Artists          []Mod.Artist
 	OptionsSearchBar []string
+	CheckedOptions   []string
 }
+
+var checkedOptions = []string{}
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("query")
@@ -23,8 +27,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	data, err := Mod.GetData()
 	if err != nil {
-		log.Printf("Erreur lors de la récupération des données: %v", err)
-		http.Error(w, "Erreur lors de la récupération des données", http.StatusInternalServerError)
+		log.Printf("Error fetching data: %v", err)
+		http.Error(w, "Error fetching data", http.StatusInternalServerError)
 		return
 	}
 
@@ -39,36 +43,66 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	filteredArtists := Mod.SearchBar(query, data)
+	filteredArtists := Mod.SearchBarCheckBox(checkedOptions, query, data)
 	optionsSearchBar := Mod.SearchOptions(query, data)
 
 	pageData := PageData{
 		Query:            displayQuery,
 		Artists:          filteredArtists,
 		OptionsSearchBar: optionsSearchBar,
+		CheckedOptions:   checkedOptions,
 	}
 
-	t, err := template.ParseFiles("Templates/grouptra.tmpl")
+	t := template.New("GroupTra.tmpl").Funcs(template.FuncMap{
+		"contains": Mod.Contains,
+	})
+	t, err = t.ParseFiles("Templates/GroupTra.tmpl")
 	if err != nil {
-		log.Printf("Erreur lors du chargement du template: %v", err)
-		http.Error(w, "Erreur lors du chargement du template", http.StatusInternalServerError)
+		log.Printf("Error loading template: %v", err)
+		http.Error(w, "Error loading template", http.StatusInternalServerError)
 		return
 	}
 
 	err = t.Execute(w, pageData)
 	if err != nil {
-		log.Printf("Erreur lors du rendu du template: %v", err)
-		http.Error(w, "Erreur lors du rendu du template", http.StatusInternalServerError)
+		log.Printf("Error rendering template: %v", err)
+		http.Error(w, "Error rendering template", http.StatusInternalServerError)
 		return
 	}
+}
+
+func getCheckedOptionsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string][]string{"checkedOptions": checkedOptions})
+}
+
+func updateCheckedOptionsHandler(w http.ResponseWriter, r *http.Request) {
+	var selection struct {
+		Option    string `json:"option"`
+		IsChecked bool   `json:"isChecked"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&selection); err != nil {
+		http.Error(w, "Invalid data", http.StatusBadRequest)
+		return
+	}
+
+	if selection.IsChecked {
+		if !Mod.Contains(checkedOptions, selection.Option) {
+			checkedOptions = append(checkedOptions, selection.Option)
+		}
+	} else {
+		checkedOptions = Mod.RemoveFromCheckedOptions(checkedOptions, selection.Option)
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func searchOptionsHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("q")
 	data, err := Mod.GetData()
 	if err != nil {
-		log.Printf("Erreur lors de la récupération des données: %v", err)
-		http.Error(w, "Erreur lors de la récupération des données", http.StatusInternalServerError)
+		log.Printf("Error fetching data: %v", err)
+		http.Error(w, "Error fetching data", http.StatusInternalServerError)
 		return
 	}
 	optionsSearchBar := Mod.SearchOptions(query, data)
@@ -85,7 +119,6 @@ func searchOptionsHandler(w http.ResponseWriter, r *http.Request) {
 
 func openBrowser(url string) {
 	var err error
-
 	switch os := runtime.GOOS; os {
 	case "linux":
 		err = exec.Command("xdg-open", url).Start()
@@ -96,7 +129,6 @@ func openBrowser(url string) {
 	default:
 		err = fmt.Errorf("unsupported platform")
 	}
-
 	if err != nil {
 		fmt.Printf("Failed to open browser: %v\n", err)
 	}
@@ -106,6 +138,8 @@ func main() {
 	http.Handle("/Styles/", http.StripPrefix("/Styles/", http.FileServer(http.Dir("Styles"))))
 	http.Handle("/Scripts/", http.StripPrefix("/Scripts/", http.FileServer(http.Dir("Scripts"))))
 	http.HandleFunc("/", handler)
+	http.HandleFunc("/get-checked-options", getCheckedOptionsHandler)
+	http.HandleFunc("/update-checked-options", updateCheckedOptionsHandler)
 	http.HandleFunc("/search", searchOptionsHandler)
 	fmt.Println("Starting server at port 8080")
 	go openBrowser("http://localhost:8080")

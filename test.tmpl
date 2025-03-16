@@ -3,42 +3,42 @@
         <button class="dropbtn">Filter</button>
         <div class="dropdown-content">
             <label>
-                <input type="checkbox" name="filter" value="creation_date" onclick="sendToServer('creation_date')">
+                <input type="checkbox" name="filter" value="creation_date" onchange="updateServer(this)">
                 Creation date
             </label>
             <label>
-                <input type="checkbox" name="filter" value="first_album_year" onclick="sendToServer('first_album_year')">
+                <input type="checkbox" name="filter" value="first_album_year" onchange="updateServer(this)">
                 First Album Year
             </label>
             <label>
-                <input type="checkbox" name="filter" value="members" onclick="sendToServer('members')">
+                <input type="checkbox" name="filter" value="members" onchange="updateServer(this)">
                 Number of members
             </label>
             <label>
-                <input type="checkbox" name="filter" value="location" onclick="sendToServer('location')">
+                <input type="checkbox" name="filter" value="location" onchange="updateServer(this)">
                 Concert location
             </label>
         </div>
     </div>
 </body>
 <script>
-    function sendToServer(option) {
-        fetch('http://localhost:8080/option', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ option: option })
-        })
-        .then(response => {
-            if (response.ok) {
-                console.log('Option sent successfully:', option);
-            } else {
-                console.error('Error sending option:', response.statusText);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    }
+
+
+
+
+function updateServer(checkbox) {
+    const option = checkbox.checked ? checkbox.value : null;
+    fetch('http://localhost:8080/option', {
+    method: 'POST',
+    body: JSON.stringify({ option })
+})
+
+}
+
+
+
+
+
+
+    
 </script>
