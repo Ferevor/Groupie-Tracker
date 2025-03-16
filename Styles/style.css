@@ -189,15 +189,13 @@ body {
     border: 0;
     color: #fff;
     letter-spacing: 3px;
-    box-shadow: 6px 0px 0px #433131;
+    box-shadow: 1px 0px 0px #ffd52d;
     outline: transparent;
     position: relative;
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
     text-decoration: none;
-    border-top-left-radius: 5%;
-    border-top-right-radius: 5%;
 }
 
 .buttonHome:after, .dropbtn:after {
@@ -354,12 +352,12 @@ body {
     font-size: 14px; 
     margin-left: 10px;
     margin-right: 10px;
-    background-color: #ffd52d; 
+    background-color: #19161c; 
     border: none; 
     border-radius: 5px; 
     cursor: pointer; 
 }
 
 .filter-button:hover, .sort-button:hover {
-    background-color: #e6c200; 
+    background-color: #19161c; 
 }
