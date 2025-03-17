@@ -1,0 +1,104 @@
+<!-- Templates/template.tmpl -->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Artist Info</title>
+        <link rel="stylesheet" type="text/css" href="/Styles/style.css">
+        <script src="/Scripts/GroupTra.js"></script>
+    </head>
+    <body>
+        <div>
+            <div class="header">
+                <h1>Groupie Tracker</h1>
+                <div class="button-container">
+                    <a href="/" class="buttonHome" role="button">Home</a>                  
+					<form method="GET" action="/">
+					<select id="filter-select" name="filter">
+						<option value="">Filter By</option>
+						<option value="CreationDate">Creation Date</option>
+                        <option value="FirstAlbum">First Album</option>
+					</select>
+						<input type="number" name="start" placeholder="De ">
+						<input type="number" name="end" placeholder="à ">
+					<button type="Submit">GO</button>
+				</form>
+                </div>
+            </div>
+            <div class="box">
+                <form method="GET" action="/" id="searchForm">
+                    <div>
+                        <div class="dropdown">
+                            <button class="sort-button dropbtn" style="display: flex; align-items: center;">Sorts</button>
+                            <div class="dropdown-content">
+                                <a href="?sort=asc">Sort Name Ascending</a>
+                                <a href="?sort=desc">Sort Name Descending</a>
+                            </div>
+                        </div>
+                        <input type="text" class="input" list="suggestionsquery" id="optionsList" name="displayQuery" value="{{.Query}}" autocomplete="off">
+                        <input type="hidden" id="searchQuery" name="query">
+                        <datalist id="suggestionsquery">
+                            {{range .OptionsSearchBar}}
+                                <option value="{{.}}">{{.}}</option>
+                            {{end}}
+                        </datalist>
+                    
+                    <div class="dropdown">
+                        <button type="button" class="filter-button dropbtn" style="display: flex; align-items: center;">Filters</button>
+                        <div class="dropdown-content">
+                            <label><input type="checkbox" name="filter" value="creation_date" onchange="updateCheckboxState(this)"> Creation date</label>
+                            <label><input type="checkbox" name="filter" value="first_album_year" onchange="updateCheckboxState(this)"> First Album Year</label>
+                            <label><input type="checkbox" name="filter" value="members" onchange="updateCheckboxState(this)"> Number of members</label>
+                            <label><input type="checkbox" name="filter" value="location" onchange="updateCheckboxState(this)"> Concert location</label>
+                        </div>
+                    </div>
+                    </div>
+                </form>
+            </div>
+            <div class="container">
+                {{if .No_results}}
+                    <div class="no-results">
+                        <h2>No results found</h2>
+                    </div>
+                {{end}}
+                {{range .Data}}
+                <label for="modal-{{.Name}}" class="button">
+                    <div>
+                        <img src="{{.Image}}" alt="Image" width="200" height="200" style="border-top-left-radius: 9%; border-top-right-radius: 9%;">
+                    </div>
+                    <div>
+                        <h2>{{.Name}}</h2>
+                    </div>
+                </label>
+                <input type="checkbox" id="modal-{{.Name}}" class="modal-toggle" tabindex="0">
+                <div class="modal">
+                    <div class="modal-content" style="background-image: url('/Images/Vinyl.png'); background-size: contain; background-position: center; background-repeat: no-repeat; background-color: White;">
+                        <label for="modal-{{.Name}}" class="close">&times;</label>
+                        <div class="invisbox">
+                            <h2 class="modal-title">{{.Name}}</h2>
+                        </div>
+                        <div class="invisbox">
+                            <p>Members: {{range .Members}}{{.}}, {{end}}</p>
+                            <p>Creation Date: {{.CreationDate}}</p>
+                            <p>First Album: {{.FirstAlbum}}</p>
+                        </div>
+                        <div class="invisbox">
+                            <p>Concert Location and Dates:</p>
+                            {{range $key, $value := .DatesLocations.DatesLocations}}
+                            <p>{{$key}}</p>
+                              <ul>
+                                {{range $value}}
+                                  <li>{{.}}</li>
+                                   {{end}}
+                            </ul>
+                            {{end}}
+                        </div>
+                        <div class="album-image">
+                            <img src="{{.Image}}" alt="Album Image" style="height:340px;">
+                        </div>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </body>
+</html>
