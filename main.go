@@ -42,8 +42,14 @@ const tmpl = `
 				</form>
 			</div>
 			<div class="box">
-    			<form name="search">
-        			<input type="text" class="input" list="suggestionsquery" id="optionsList" name="displayQuery" value="{{.Query}}" autocomplete="off" placeholder=" ">
+    			<form method="GET" action="/" id="searchForm">
+        			<input type="text" class="input" list="suggestionsquery" id="optionsList" name="displayQuery" value="{{.Query}}" autocomplete="off" placeholder=" "/>
+					<input type="hidden" id="searchQuery" name="query">
+					<datalist id="suggestionsquery">
+						{{range .OptionsSearchBar}}
+                        	<option value="{{.}}">{{.}}</option>
+                    {{end}}
+					</datalist>
     			</form>
 			</div>
 			<div class="container">
@@ -92,8 +98,16 @@ const tmpl = `
 </html>
 `
 
+type PageData struct {
+	Query            string
+	Data             []Mod.Artist
+	OptionsSearchBar []string
+	No_results       bool
+}
+
 func handler(w http.ResponseWriter, r *http.Request) {
-	// Appeler la fonction GetArtist depuis GroupieTracker.go
+	displayQuery := r.URL.Query().Get("displayQuery")
+	query := r.URL.Query().Get("query")
 	data, err := Mod.GetData()
 	if err != nil {
 		log.Printf("Erreur lors de la récupération des données: %v", err)
@@ -108,7 +122,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	end := r.URL.Query().Get("end")
 
 	// Filtrer les artistes par date de création si les paramètres sont présents
-
 	if start != "" && end != "" { // Si les paramètres sont présents
 		startYear, err := strconv.Atoi(start) // Convertir les paramètres en entiers
 		if err != nil {
@@ -131,6 +144,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 					filteredData = append(filteredData, artist) // Ajouter l'artiste à la liste des artistes filtrés
 				}
 			}
+			data = filteredData // Remplacer les données par les données filtrées
+			log.Printf("Données filtrées: %v", filteredData)
 		case "FirstAlbum":
 			for _, artist := range data {
 				firstAlbumYear := strings.Split(artist.FirstAlbum, "-")   // Diviser la chaîne de l'année du premier album pour avoir seulement l'année
@@ -160,6 +175,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
+	//filteredArtists := Mod.SearchBar(query, data)
+	optionsSearchBar := Mod.SearchOptions(query, data)
+
 	var no_results bool
 	if len(data) == 0 {
 		no_results = true
@@ -178,16 +196,40 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Valeur de no_results: %v", no_results)
 
+	pageData := PageData{
+		Query:            displayQuery,
+		Data:             data,
+		OptionsSearchBar: optionsSearchBar,
+		No_results:       no_results,
+	}
+
 	// Rendre le template avec les données
-	err = tmpl.Execute(w, map[string]interface{}{
-		"No_results": no_results,
-		"Data":       data,
-	})
+	err = tmpl.Execute(w, pageData)
 
 	if err != nil {
 		log.Printf("Erreur lors du rendu du template: %v", err)
 		http.Error(w, "Erreur lors du rendu du template", http.StatusInternalServerError)
 		return
+	}
+}
+
+func searchOptionsHandler(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("q")
+	data, err := Mod.GetData()
+	if err != nil {
+		log.Printf("Erreur lors de la récupération des données: %v", err)
+		http.Error(w, "Erreur lors de la récupération des données", http.StatusInternalServerError)
+		return
+	}
+	optionsSearchBar := Mod.SearchOptions(query, data)
+
+	if len(optionsSearchBar) > 5 {
+		optionsSearchBar = optionsSearchBar[:5]
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	for _, option := range optionsSearchBar {
+		fmt.Fprintf(w, "<option value=\"%s\">%s</option>", option, option)
 	}
 }
 
@@ -212,7 +254,9 @@ func openBrowser(url string) {
 
 func main() {
 	http.Handle("/Styles/", http.StripPrefix("/Styles/", http.FileServer(http.Dir("Styles"))))
+	http.Handle("/Scripts/", http.StripPrefix("/Scripts/", http.FileServer(http.Dir("Scripts"))))
 	http.HandleFunc("/", handler)
+	http.HandleFunc("/search", searchOptionsHandler)
 	fmt.Println("Starting server at port 8080")
 	go openBrowser("http://localhost:8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
