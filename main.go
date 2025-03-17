@@ -10,13 +10,16 @@ import (
 	"os/exec"
 	"runtime"
 	"sort"
+	"strconv"
+	"strings"
 )
 
 type PageData struct {
 	Query            string
-	Artists          []Mod.Artist
+	Data             []Mod.Artist
 	OptionsSearchBar []string
 	CheckedOptions   []string
+	No_results       bool
 }
 
 var checkedOptions = []string{}
@@ -32,6 +35,48 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	start := r.URL.Query().Get("start")
+	end := r.URL.Query().Get("end")
+
+	if start != "" && end != "" {
+		startYear, err := strconv.Atoi(start)
+		if err != nil {
+			log.Printf("Error converting start year to int: %v", err)
+			http.Error(w, "Error converting start year to int", http.StatusBadRequest)
+			return
+		}
+		endYear, err := strconv.Atoi(end)
+		if err != nil {
+			log.Printf("Error converting end year to int: %v", err)
+			http.Error(w, "Error converting end year to int", http.StatusBadRequest)
+			return
+		}
+
+		var filteredArtists []Mod.Artist
+		switch r.URL.Query().Get("filter") {
+		case "CreationDate":
+			for _, artist := range data {
+				if artist.CreationDate >= startYear && artist.CreationDate <= endYear {
+					filteredArtists = append(filteredArtists, artist)
+				}
+			}
+			data = filteredArtists
+		case "FirstAlbum":
+			for _, artist := range data {
+				firstAlbumYear := strings.Split(artist.FirstAlbum, "-")
+				firstAlbumYearInt, err := strconv.Atoi(firstAlbumYear[2])
+				if err != nil {
+					log.Printf("Error converting first album year to int: %v", err)
+					http.Error(w, "Error converting first album year to int", http.StatusBadRequest)
+					return
+				}
+				if firstAlbumYearInt >= startYear && firstAlbumYearInt <= endYear {
+					filteredArtists = append(filteredArtists, artist)
+				}
+			}
+			data = filteredArtists
+		}
+	}
 	sortOrder := r.URL.Query().Get("sort")
 	if sortOrder == "asc" {
 		sort.Slice(data, func(i, j int) bool {
@@ -46,11 +91,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	filteredArtists := Mod.SearchBarCheckBox(checkedOptions, query, data)
 	optionsSearchBar := Mod.SearchOptions(query, data)
 
+	var no_results bool
+	if len(filteredArtists) == 0 {
+		no_results = true
+	}
+
 	pageData := PageData{
 		Query:            displayQuery,
-		Artists:          filteredArtists,
+		Data:             filteredArtists,
 		OptionsSearchBar: optionsSearchBar,
 		CheckedOptions:   checkedOptions,
+		No_results:       no_results,
 	}
 
 	t := template.New("GroupTra.tmpl").Funcs(template.FuncMap{
@@ -137,6 +188,7 @@ func openBrowser(url string) {
 func main() {
 	http.Handle("/Styles/", http.StripPrefix("/Styles/", http.FileServer(http.Dir("Styles"))))
 	http.Handle("/Scripts/", http.StripPrefix("/Scripts/", http.FileServer(http.Dir("Scripts"))))
+	http.Handle("/Images/", http.StripPrefix("/Images/", http.FileServer(http.Dir("Images"))))
 	http.HandleFunc("/", handler)
 	http.HandleFunc("/get-checked-options", getCheckedOptionsHandler)
 	http.HandleFunc("/update-checked-options", updateCheckedOptionsHandler)

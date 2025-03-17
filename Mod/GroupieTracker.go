@@ -62,23 +62,6 @@ func GetData() ([]Artist, error) {
 	return artists, nil
 }
 
-// /// on peux enlever cette fonction du code sauf si vous l'utilisez moi non
-func GetOneArtistInfo(name string) Artist {
-	art, _ := GetData()
-	var artInfo Artist
-	for i := range art {
-		if art[i].Name == name {
-			artInfo.Image = art[i].Image
-			artInfo.Name = art[i].Name
-			artInfo.Members = art[i].Members
-			artInfo.CreationDate = art[i].CreationDate
-			artInfo.FirstAlbum = art[i].FirstAlbum
-			artInfo.DatesLocations = art[i].DatesLocations
-		}
-	}
-	return artInfo
-}
-
 func RightFormForDate(date string) string {
 	date = strings.ReplaceAll(date, "/", "-")
 	return date

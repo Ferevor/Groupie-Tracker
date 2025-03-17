@@ -112,38 +112,46 @@ body {
     width: 100%;
     height: 100%;
     overflow: auto;
+    border: 4px solid black;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     background-color: rgba(0, 0, 0, 0.3);
+    
 }
 
 .modal-content {
     position: relative;
-    width: 80%; /* Adjust as needed */
+    width: 80%; 
     max-width: 600px; /* Ensure it doesn't get too large */
     margin: 50px auto;
     padding: 20px;
-    background-size: cover; /* Ensure the image covers the entire modal */
-    background-position: center; /* Center the image */
-    background-color: white; /* Fill the rest of the modal with white */
+    background-color: #504e53; 
     border-radius: 10px;
+    border: 4px solid #ffd52d;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     overflow: hidden; /* Ensure the image doesn't overflow */
 }
 
+.modal-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    justify-content: space-between;
+}
+
 .album-image {
-    position: absolute;
-    top: 50%;
-    left: 35%;
-    transform: translate(-50%, -50%);
-    z-index: 0; /* Ensure it is behind the text */
-    width: 100%;
-    height: auto;
+    position: relative;
+    z-index: 0;
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 190px;
 }
 
 .modal-title {
-    text-align: center; /* Center the title */
+    text-align: center;
+    flex-grow: 1;
+    text-align: center;
+    position: relative;
 }
 
 .close {
@@ -360,4 +368,28 @@ body {
 
 .filter-button:hover, .sort-button:hover {
     background-color: #19161c; 
+}
+
+.no-results {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: aliceblue;
+    font-size: 20px;
+    border: 4px solid #ffd52d;
+    margin-top: 60px;
+    width: 30%;
+    height: 50px;
+}
+
+.image-container {
+    position: relative;
+    height: 100px;
+}
+
+.vinyl-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 200px;
 }

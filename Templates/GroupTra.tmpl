@@ -15,7 +15,8 @@
 					<form method="GET" action="/">
 					<select id="filter-select" name="filter">
 						<option value="">Filter By</option>
-						<option value="?filter=CreatioDate">Creation Date</option>
+						<option value="CreationDate">Creation Date</option>
+                        <option value="FirstAlbum">First Album</option>
 					</select>
 						<input type="number" name="start" placeholder="De ">
 						<input type="number" name="end" placeholder="à ">
@@ -54,7 +55,12 @@
                 </form>
             </div>
             <div class="container">
-                {{range .Artists}}
+                {{if .No_results}}
+                    <div class="no-results">
+                        <h2>No results found</h2>
+                    </div>
+                {{end}}
+                {{range .Data}}
                 <label for="modal-{{.Name}}" class="button">
                     <div>
                         <img src="{{.Image}}" alt="Image" width="200" height="200" style="border-top-left-radius: 9%; border-top-right-radius: 9%;">
@@ -65,10 +71,14 @@
                 </label>
                 <input type="checkbox" id="modal-{{.Name}}" class="modal-toggle" tabindex="0">
                 <div class="modal">
-                    <div class="modal-content" style="background-image: url('/Images/Vinyl.png'); background-size: contain; background-position: center; background-repeat: no-repeat; background-color: White;">
+                    <div class="modal-content">
                         <label for="modal-{{.Name}}" class="close">&times;</label>
-                        <div class="invisbox">
-                            <h2 class="modal-title">{{.Name}}</h2>
+                        <div class="modal-header">
+                            <div class="modal-title">
+                                <img src="/Images/Vinyl.png" alt="vinyl Image" class="vinyl-image">
+                                <img src="{{.Image}}" alt="Album Image" class="album-image">
+                                <h2>{{.Name}}</h2>
+                            </div>
                         </div>
                         <div class="invisbox">
                             <p>Members: {{range .Members}}{{.}}, {{end}}</p>
@@ -85,9 +95,6 @@
                                    {{end}}
                             </ul>
                             {{end}}
-                        </div>
-                        <div class="album-image">
-                            <img src="{{.Image}}" alt="Album Image" style="height:340px;">
                         </div>
                     </div>
                 </div>
