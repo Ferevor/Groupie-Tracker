@@ -39,17 +39,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	start := r.URL.Query().Get("start")
-	end := r.URL.Query().Get("end")
+	start := r.URL.Query().Get("start") // Année de début pour la recherche
+	end := r.URL.Query().Get("end")     // Année de fin pour la recherche
 
-	if start != "" && end != "" {
-		startYear, err := strconv.Atoi(start)
+	if start != "" && end != "" { // Si les années de début et de fin sont renseignées
+		startYear, err := strconv.Atoi(start) // Convertir les années en entiers
 		if err != nil {
 			log.Printf("Error converting start year to int: %v", err)
 			http.Error(w, "Error converting start year to int", http.StatusBadRequest)
 			return
 		}
-		endYear, err := strconv.Atoi(end)
+		endYear, err := strconv.Atoi(end) // Convertir les années en entiers
 		if err != nil {
 			log.Printf("Error converting end year to int: %v", err)
 			http.Error(w, "Error converting end year to int", http.StatusBadRequest)
@@ -58,35 +58,35 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 		var filteredArtists []Mod.Artist
 		switch r.URL.Query().Get("filter") {
-		case "CreationDate":
-			for _, artist := range data {
-				if artist.CreationDate >= startYear && artist.CreationDate <= endYear {
-					filteredArtists = append(filteredArtists, artist)
+		case "CreationDate": //dans le cas où l'utilisateur veut filtrer par date de création
+			for _, artist := range data { //on parcourt les artistes
+				if artist.CreationDate >= startYear && artist.CreationDate <= endYear { //on vérifie si la date de création de l'artiste est comprise entre les dates de début et de fin
+					filteredArtists = append(filteredArtists, artist) //si c'est le cas, on ajoute l'artiste à la liste des artistes filtrés
 				}
 			}
-			data = filteredArtists
-		case "FirstAlbum":
-			for _, artist := range data {
-				firstAlbumYear := strings.Split(artist.FirstAlbum, "-")
-				firstAlbumYearInt, err := strconv.Atoi(firstAlbumYear[2])
+			data = filteredArtists //on met à jour les données avec les artistes filtrés
+		case "FirstAlbum": //dans le cas où l'utilisateur veut filtrer par date du premier album
+			for _, artist := range data { //on parcourt les artistes
+				firstAlbumYear := strings.Split(artist.FirstAlbum, "-")   //on récupère l'année du premier album de l'artiste
+				firstAlbumYearInt, err := strconv.Atoi(firstAlbumYear[2]) //on convertit l'année en entier
 				if err != nil {
 					log.Printf("Error converting first album year to int: %v", err)
 					http.Error(w, "Error converting first album year to int", http.StatusBadRequest)
 					return
 				}
-				if firstAlbumYearInt >= startYear && firstAlbumYearInt <= endYear {
-					filteredArtists = append(filteredArtists, artist)
+				if firstAlbumYearInt >= startYear && firstAlbumYearInt <= endYear { //on vérifie si l'année du premier album de l'artiste est comprise entre les dates de début et de fin
+					filteredArtists = append(filteredArtists, artist) //si c'est le cas, on ajoute l'artiste à la liste des artistes filtrés
 				}
 			}
-			data = filteredArtists
+			data = filteredArtists //on met à jour les données avec les artistes filtrés
 		}
 	}
-	sortOrder := r.URL.Query().Get("sort")
-	if sortOrder == "asc" {
+	sortOrder := r.URL.Query().Get("sort") // Récupère le paramètre de tri "sort" dans la chaîne de requête URL
+	if sortOrder == "asc" {                // Si le tri est ascendant
 		sort.Slice(data, func(i, j int) bool {
 			return data[i].Name < data[j].Name
 		})
-	} else if sortOrder == "desc" {
+	} else if sortOrder == "desc" { // Si le tri est descendant
 		sort.Slice(data, func(i, j int) bool {
 			return data[i].Name > data[j].Name
 		})
@@ -96,8 +96,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	filteredArtists := Mod.SearchBarCheckBox(checkedOptions, query, data)
 	optionsSearchBar := Mod.SearchOptions(query, data) // Suggestions pour la barre de recherche
 
-	var no_results bool
-	if len(filteredArtists) == 0 {
+	var no_results bool            // Variable pour indiquer si aucun résultat n'a été trouvé
+	if len(filteredArtists) == 0 { // Si la liste des artistes filtrés est vide
 		no_results = true
 	}
 
